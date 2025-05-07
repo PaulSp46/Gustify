@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gustify - Accedi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                Gustify
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="login-form">
+            <div class="form-header">
+                <h1>Benvenuto</h1>
+                <p>Accedi al tuo account Gustify</p>
+            </div>
+            
+            <form id="login-form" method="POST" action="login.php">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input name="email" type="email" id="email" placeholder="Inserisci la tua email" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input name="password" type="password" id="password" placeholder="Inserisci la tua password" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">Accedi</button>
+                
+                <div class="signup-link">
+                    Non hai un account? <a href="../register/register.html">Registrati</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
+    </footer>
+</body>
+</html>

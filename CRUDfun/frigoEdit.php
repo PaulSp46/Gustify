@@ -73,16 +73,14 @@
 <body>
     <header>
         <nav>
-            <div class="logo">
+            <a href="../index.php" class="logo">
                 <i class="fas fa-leaf"></i>
                 Gustify
-            </div>
+            </a>
             <ul class="nav-links">
-                <li><a href="../index.html"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="dashboard.php"><i class="fas fa-dashboard"></i> Dashboard</a></li>
-                <li><a href="productsList.php" class="active"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
-                <li><a href=""><i class="fas fa-chart-pie"></i> Alimentazione</a></li>
-                <li><a href=""><i class="fas fa-user"></i> Profilo</a></li>
+                <li><a href="../dashboard/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="../productsList/productsList.php" class="active"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
+                <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
                 <i class="fas fa-bars"></i>
@@ -91,17 +89,27 @@
     </header>
     
     <div class="container">
-        <section class="hero">
+        <section class="hero fade-in">
             <h1>Modifica Prodotto</h1>
-            <p>Aggiorna i dettagli del prodotto nel tuo frigorifero</p>
+            <p>Aggiorna i dettagli del prodotto nel tuo inventario</p>
         </section>
         
-        <div class="form-container">
+        <div class="form-container fade-in">
             <form method="POST" action="">
                 <div class="form-group">
                     <label for="quantity">Quantità (confezioni)</label>
-                    <input type="number" id="quantity" name="quantity" class="form-control" 
-                           value="<?php echo htmlspecialchars($product['quantity']); ?>" min="1" required>
+                    <div class="number-input-wrapper">
+                        <input type="number" id="quantity" name="quantity" class="form-control" 
+                               value="<?php echo htmlspecialchars($product['quantity']); ?>" min="1" required>
+                        <div class="number-control">
+                            <button type="button" class="number-btn increase-btn" aria-label="Aumenta quantità">
+                                <i class="fas fa-chevron-up"></i>
+                            </button>
+                            <button type="button" class="number-btn decrease-btn" aria-label="Diminuisci quantità">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -122,18 +130,126 @@
         </div>
     </div>
     
+    <!-- Toast Notification (hidden by default) -->
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">Operazione completata</div>
+            <div class="toast-message">Le modifiche sono state salvate con successo.</div>
+        </div>
+        <div class="toast-close">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+    
     <footer>
         <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
     </footer>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Gestione menu mobile (se necessario)
+            // Gestione menu mobile
             const mobileMenuIcon = document.querySelector('.mobile-menu-icon');
             const navLinks = document.querySelector('.nav-links');
             
             if (mobileMenuIcon && navLinks) {
                 mobileMenuIcon.addEventListener('click', function() {
                     navLinks.classList.toggle('show');
+                });
+            }
+            
+            // Controlli per input numerico
+            const quantityInput = document.getElementById('quantity');
+            const increaseBtn = document.querySelector('.increase-btn');
+            const decreaseBtn = document.querySelector('.decrease-btn');
+            
+            if (quantityInput && increaseBtn && decreaseBtn) {
+                increaseBtn.addEventListener('click', function() {
+                    quantityInput.value = parseInt(quantityInput.value) + 1;
+                });
+                
+                decreaseBtn.addEventListener('click', function() {
+                    if (parseInt(quantityInput.value) > 1) {
+                        quantityInput.value = parseInt(quantityInput.value) - 1;
+                    }
+                });
+            }
+            
+            // Gestione toast notification
+            function showToast(type, title, message) {
+                const toast = document.getElementById('toast');
+                const toastIcon = toast.querySelector('.toast-icon i');
+                const toastTitle = toast.querySelector('.toast-title');
+                const toastMessage = toast.querySelector('.toast-message');
+                
+                // Imposta icona in base al tipo
+                if (type === 'success') {
+                    toast.className = 'toast success';
+                    toastIcon.className = 'fas fa-check-circle';
+                } else if (type === 'error') {
+                    toast.className = 'toast error';
+                    toastIcon.className = 'fas fa-exclamation-circle';
+                }
+                
+                // Imposta contenuto
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+                
+                // Mostra toast
+                toast.classList.add('show');
+                
+                // Nascondi dopo 3 secondi
+                setTimeout(function() {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Chiusura toast
+            const toastClose = document.querySelector('.toast-close');
+            if (toastClose) {
+                toastClose.addEventListener('click', function() {
+                    document.getElementById('toast').classList.remove('show');
+                });
+            }
+            
+            // Controlla se c'è un parametro message nell'URL (per mostrare toast dopo redirect)
+            const urlParams = new URLSearchParams(window.location.search);
+            const messageParam = urlParams.get('message');
+            
+            if (messageParam === 'updated') {
+                showToast('success', 'Modifiche Salvate', 'Le modifiche sono state salvate con successo.');
+            }
+            
+            // Validazione form prima dell'invio
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    let isValid = true;
+                    
+                    // Validazione quantità
+                    if (parseInt(quantityInput.value) < 1) {
+                        isValid = false;
+                        quantityInput.style.borderColor = 'var(--error-color)';
+                        showToast('error', 'Errore di Validazione', 'La quantità deve essere maggiore di zero.');
+                    } else {
+                        quantityInput.style.borderColor = 'var(--border-color)';
+                    }
+                    
+                    // Validazione data di scadenza
+                    const expiryDate = document.getElementById('expiry_date');
+                    if (!expiryDate.value) {
+                        isValid = false;
+                        expiryDate.style.borderColor = 'var(--error-color)';
+                        showToast('error', 'Errore di Validazione', 'La data di scadenza è obbligatoria.');
+                    } else {
+                        expiryDate.style.borderColor = 'var(--border-color)';
+                    }
+                    
+                    if (!isValid) {
+                        e.preventDefault();
+                    }
                 });
             }
         });

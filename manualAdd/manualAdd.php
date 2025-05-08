@@ -109,7 +109,6 @@
             $cognome = "";
         }
     }
-
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -123,15 +122,14 @@
 <body>
     <header>
         <nav>
-            <div class="logo">
+            <a href="../index.php" class="logo">
                 <i class="fas fa-leaf"></i>
                 Gustify
-            </div>
+            </a>
             <ul class="nav-links">
-                <li><a href="../index.html"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="../dashboard/dashboard.php"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+                <li><a href="../dashboard/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="../productsList/productsList.php"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
-                <li><a href=""><i class="fas fa-user"></i> Profilo</a></li>
+                <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
                 <i class="fas fa-bars"></i>
@@ -145,19 +143,24 @@
             <p>Inserisci i dettagli del prodotto che desideri aggiungere al tuo frigo virtuale</p>
         </section>
         
-        <div class="form-container">
+        <div class="form-container fade-in">
             <h2 class="page-title">Dettagli Prodotto</h2>
             
             <?php if (!empty($message)): ?>
                 <div class="alert alert-<?php echo $messageType; ?>">
-                    <?php echo $message; ?>
+                    <?php if ($messageType == "success"): ?>
+                        <i class="fas fa-check-circle toast-icon"></i>
+                    <?php else: ?>
+                        <i class="fas fa-exclamation-circle toast-icon"></i>
+                    <?php endif; ?>
+                    <div><?php echo $message; ?></div>
                 </div>
             <?php endif; ?>
             
             <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                 <div class="form-group">
                     <label for="des">Nome o Descrizione *</label>
-                    <input type="text" id="des" name="des" class="form-control" required>
+                    <input type="text" id="des" name="des" class="form-control" placeholder="Inserisci il nome del prodotto" required>
                 </div>
                 
                 <div class="form-group">
@@ -179,12 +182,12 @@
 
                 <div class="form-group">
                     <label for="marca">Marca *</label>
-                    <input type="text" id="marca" name="marca" class="form-control" required>
+                    <input type="text" id="marca" name="marca" class="form-control" placeholder="Inserisci la marca del prodotto" required>
                 </div>
 
                 <div class="form-group">
                     <label for="bar_code">Codice a barre *</label>
-                    <input type="text" id="bar_code" name="bar_code" class="form-control" required>
+                    <input type="text" id="bar_code" name="bar_code" class="form-control" placeholder="Inserisci il codice a barre del prodotto" required>
                 </div>
                 
                 <div class="form-group">
@@ -194,23 +197,37 @@
                 
                 <div class="form-group">
                     <label for="quantita">Quantità *</label>
-                    <input type="number" id="quantita" name="quantita" min="1" class="form-control" required>
+                    <input type="number" id="quantita" name="quantita" min="1" value="1" class="form-control" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="note">Note (opzionale)</label>
-                    <textarea id="note" name="note" class="form-control" rows="3"></textarea>
+                    <textarea id="note" name="note" class="form-control" rows="3" placeholder="Inserisci eventuali note sul prodotto"></textarea>
                 </div>
                 
                 <div class="button-group">
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-save"></i> Salva Prodotto
-                    </button>
                     <a href="../dashboard/dashboard.php" class="cancel-btn">
                         <i class="fas fa-times"></i> Annulla
                     </a>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i> Salva Prodotto
+                    </button>
                 </div>
             </form>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">Operazione completata</div>
+            <div class="toast-message">Prodotto aggiunto con successo.</div>
+        </div>
+        <div class="toast-close" onclick="closeToast()">
+            <i class="fas fa-times"></i>
         </div>
     </div>
     
@@ -219,8 +236,19 @@
     </footer>
     
     <script>
-        // Set minimum date to today
+        // Mobile menu
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuIcon = document.querySelector('.mobile-menu-icon');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (mobileMenuIcon && navLinks) {
+                mobileMenuIcon.addEventListener('click', function() {
+                    navLinks.classList.toggle('show');
+                });
+            }
+            
+            // Set minimum date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('data_scadenza').setAttribute('min', today);
 
@@ -229,7 +257,42 @@
             nextWeek.setDate(nextWeek.getDate() + 7);
             const nextWeekFormatted = nextWeek.toISOString().split('T')[0];
             document.getElementById('data_scadenza').value = nextWeekFormatted;
+            
+            // Toast notification
+            <?php if (!empty($message) && $messageType == "success"): ?>
+                showToast('Operazione completata', '<?php echo $message; ?>', 'success');
+            <?php elseif (!empty($message) && $messageType == "error"): ?>
+                showToast('Errore', '<?php echo $message; ?>', 'error');
+            <?php endif; ?>
         });
+        
+        // Toast functions
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastTitle = toast.querySelector('.toast-title');
+            const toastMessage = toast.querySelector('.toast-message');
+            const toastIcon = toast.querySelector('.toast-icon i');
+            
+            toast.className = 'toast ' + type;
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle';
+            } else {
+                toastIcon.className = 'fas fa-exclamation-circle';
+            }
+            
+            toast.classList.add('show');
+            
+            // Hide toast after 5 seconds
+            setTimeout(closeToast, 5000);
+        }
+        
+        function closeToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('show');
+        }
     </script>
 </body>
 </html>

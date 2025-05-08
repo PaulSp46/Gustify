@@ -8,6 +8,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const scannedProductsList = document.getElementById('scanned-products');
     const actionsPopup = document.getElementById('product-actions-popup');
 
+    // ——— NOTIFICHE SCADENZE ———
+
+    // 1. Chiedo permesso alle notifiche
+    if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+        Notification.requestPermission();
+        }
+    }
+    
+    // 2. Funzione che interroga notifications.php e mostra le notifiche
+    function checkExpiryNotifications() {
+        if (Notification.permission !== 'granted') return;
+      
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '../utility/notification.php', true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              let data;
+              try {
+                data = JSON.parse(xhr.responseText);
+              } catch (e) {
+                return console.error('Risposta JSON non valida', e);
+              }
+              data.forEach(item => {
+                const title = `Prodotto in scadenza`;
+                const body  = `${item.name} scade tra ${item.daysLeft} giorno${item.daysLeft > 1 ? 'i' : ''}.`;
+                const key = `notified_expiry_${item.id}`;
+                if (!localStorage.getItem(key)) {
+                  new Notification(title, { body, icon: '/path/to/icon.png' });
+                  localStorage.setItem(key, '1');
+                }
+              });
+            } else if (xhr.status === 401) {
+              console.error('Non autenticato per le notifiche.');
+            } else {
+              console.error('Errore server notifiche:', xhr.status);
+            }
+          }
+        };
+        xhr.onerror = function() {
+          console.error('Errore di rete durante richiesta notifiche.');
+        };
+        xhr.send();
+    }
+    
+    // 3. Lancio subito al caricamento e poi ogni 6 ore
+    checkExpiryNotifications();
+    setInterval(checkExpiryNotifications, 6 * 60 * 60 * 1000);
+    
+
+
     let html5QrCode = null;
     window.currentProductId = null;
 
@@ -38,12 +90,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Funzioni per le azioni sui prodotti
     window.consumeProduct = function(productId) {
-        actionsPopup.style.display = 'none';
-        if (confirm('Vuoi segnare questo prodotto come consumato?')) {
-            // TODO: Implementare la logica AJAX per segnare un prodotto come consumato
-            console.log(`Prodotto ${productId} consumato`);
+        // Qui dovresti implementare la logica per marcare il prodotto come consumato
+        // Per ora simuliamo un successo
+        document.getElementById('product-actions-popup').style.display = 'none';
+        showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
+        
+        // Rimuovi l'elemento dalla lista (simulazione)
+        const productElements = document.querySelectorAll('.product-item');
+        for (let product of productElements) {
+            if (product.querySelector('.product-actions i').getAttribute('onclick').includes(productId)) {
+                product.style.opacity = '0';
+                setTimeout(() => {
+                    product.remove();
+                    checkEmptyList();
+                }, 300);
+                break;
+            }
         }
-    };
+    }
     
     window.editProduct = function(productId) {
         actionsPopup.style.display = 'none';
@@ -221,6 +285,31 @@ document.addEventListener('DOMContentLoaded', function() {
             successMessage.style.display = 'none';
             overlay.style.display = 'none';
         });
+    }
+
+    function showToast(title, message) {
+        const toast = document.getElementById('toast');
+        const toastTitle = toast.querySelector('.toast-title');
+        const toastMessage = toast.querySelector('.toast-message');
+        
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    function checkEmptyList() {
+        const productList = document.querySelector('.product-list');
+        if (productList.children.length === 0) {
+            const emptyMessage = document.createElement('li');
+            emptyMessage.className = 'empty-message';
+            emptyMessage.textContent = 'Nessun prodotto nel tuo frigo.';
+            productList.appendChild(emptyMessage);
+        }
     }
 
     // ——— HELPERS ———

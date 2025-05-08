@@ -40,15 +40,14 @@
 <body>
     <header>
         <nav>
-            <div class="logo">
+            <a href="../index.php" class="logo">
                 <i class="fas fa-leaf"></i>
                 Gustify
-            </div>
+            </a>
             <ul class="nav-links">
-                <li><a href="../index.html"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="../dashboard/dashboard.php"><i class="fas fa-dashboard"></i> Dashboard</a></li>
-                <li><a href="fridge.php" class="active"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
-                <li><a href=""><i class="fas fa-user"></i> Profilo</a></li>
+                <li><a href="../dashboard/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="productsList.php" class="active"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
+                <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
                 <i class="fas fa-bars"></i>
@@ -66,7 +65,7 @@
                     Scansiona QR Code
                 </button>
                 <button class="manual-btn" onclick="location.href='../manualAdd/manualAdd.php'">
-                    <i class="fa fa-plus"></i>
+                    <i class="fas fa-plus"></i>
                     Aggiungi manualmente
                 </button>
             </div>
@@ -138,7 +137,7 @@
                         'bakery' => 'fa-bread-slice',
                         'beverage' => 'fa-wine-bottle',
                         'snack' => 'fa-cookie',
-                        'cereal' => 'fa-solid fa-wheat-awn',
+                        'cereal' => 'fa-wheat-awn',
                         'other' => 'fa-shopping-basket'
                     ];
                     
@@ -150,7 +149,7 @@
                     $expiryClass = getExpiryClass($product['scadenza']);
                     $categoryIcon = getCategoryIcon($product['categoria']);
             ?>
-            <div class="product-card" data-category="<?php echo htmlspecialchars($product['categoria']); ?>">
+            <div class="product-card" data-category="<?php echo htmlspecialchars($product['categoria']); ?>" data-expiry="<?php echo $expiryClass; ?>">
                 <div class="product-category">
                     <i class="fas <?php echo $categoryIcon; ?>"></i>
                 </div>
@@ -209,16 +208,26 @@
             <h3>Il tuo frigo è vuoto!</h3>
             <p>Aggiungi i tuoi prodotti alimentari per iniziare a monitorare le scadenze e ottimizzare i consumi.</p>
             <button class="manual-btn" onclick="location.href='../manualAdd/manualAdd.php'">
-                <i class="fa fa-plus"></i>
+                <i class="fas fa-plus"></i>
                 Aggiungi prodotti
             </button>
         </div>
         <?php endif; ?>
     </div>
     
-    <footer>
-        <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
-    </footer>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">Operazione completata</div>
+            <div class="toast-message">Prodotto aggiornato con successo.</div>
+        </div>
+        <div class="toast-close" onclick="closeToast()">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
     
     <!-- QR Reader Modal -->
     <div class="overlay" id="overlay"></div>
@@ -238,6 +247,10 @@
         </ul>
         <button id="success-close-btn">Chiudi</button>
     </div>
+    
+    <footer>
+        <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
+    </footer>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
     <script src="productsList.js"></script>

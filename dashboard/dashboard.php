@@ -24,22 +24,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gustify - Gestisci la tua alimentazione</title>
+    <title>Gustify - Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     <header>
         <nav>
-            <div class="logo">
+            <a href="../index.php" class="logo">
                 <i class="fas fa-leaf"></i>
                 Gustify
-            </div>
+            </a>
             <ul class="nav-links">
-                <li><a href="../index.html"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="dashboard.php"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+                <li><a href="dashboard.php" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="../productsList/productsList.php"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
-                <li><a href=""><i class="fas fa-user"></i> Profilo</a></li>
+                <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
                 <i class="fas fa-bars"></i>
@@ -57,7 +56,7 @@
                     Scansiona QR Code
                 </button>
                 <button class="manual-btn" onclick="location.href='../manualAdd/manualAdd.php'">
-                    <i class="fa fa-plus"></i>
+                    <i class="fas fa-plus"></i>
                     Aggiungi manualmente
                 </button>
             </div>
@@ -84,7 +83,10 @@
         <section class="products">
             <div class="section-header">
                 <h2>I tuoi prodotti in scadenza</h2>
-                <a href="../productsList/productsList.php" class="view-all">Vedi tutti</a>
+                <a href="../productsList/productsList.php" class="view-all">
+                    Vedi tutti
+                    <i class="fas fa-chevron-right"></i>
+                </a>
             </div>
             
             <ul class="product-list">
@@ -134,7 +136,7 @@
                         'bakery' => 'fa-bread-slice',
                         'beverage' => 'fa-wine-bottle',
                         'snack' => 'fa-cookie',
-                        'cereal' => 'fa-solid fa-wheat-awn',
+                        'cereal' => 'fa-wheat-awn',
                         'other' => 'fa-shopping-basket'
                     ];
                     
@@ -172,7 +174,7 @@
                         $count++;
                     }
                 } else {
-                    echo '<li class="empty-message">Nessun prodotto nel tuo frigo. <a href="../manualAdd/manualAdd.php">Aggiungi prodotti</a></li>';
+                    echo '<li class="empty-message">Nessun prodotto nel tuo frigo.</li>';
                 }
                 ?>
             </ul>
@@ -186,7 +188,7 @@
     <!-- QR Reader Modal -->
     <div class="overlay" id="overlay"></div>
     <div id="qr-reader">
-        <button id="qr-close-btn">X</button>
+        <button id="qr-close-btn"><i class="fas fa-times"></i></button>
         <div id="qr-reader__status">Attivazione scanner...</div>
         <div id="qr-reader__camera"></div>
         <select id="qr-reader__camera-selection"></select>
@@ -194,7 +196,7 @@
     
     <!-- Success Message Modal -->
     <div class="success-message" id="success-message">
-        <h3>Acquisto sincronizzato con successo!</h3>
+        <h3><i class="fas fa-check-circle"></i> Acquisto sincronizzato con successo!</h3>
         <p>Prodotti importati:</p>
         <ul class="product-list" id="scanned-products">
             <!-- Prodotti scansionati saranno aggiunti qui -->
@@ -207,6 +209,20 @@
         <button onclick="editProduct(currentProductId)"><i class="fas fa-edit"></i> Modifica</button>
         <button onclick="consumeProduct(currentProductId)"><i class="fas fa-utensils"></i> Consumato</button>
         <button onclick="deleteProduct(currentProductId)"><i class="fas fa-trash"></i> Elimina</button>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">Successo</div>
+            <div class="toast-message">Operazione completata con successo.</div>
+        </div>
+        <div class="toast-close">
+            <i class="fas fa-times"></i>
+        </div>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>

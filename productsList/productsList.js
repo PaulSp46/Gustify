@@ -6,8 +6,139 @@ document.addEventListener('DOMContentLoaded', function() {
     const successMessage = document.getElementById('success-message');
     const successCloseBtn = document.getElementById('success-close-btn');
     const scannedProductsList = document.getElementById('scanned-products');
+    const actionsPopup = document.getElementById('product-actions-popup');
+
+    // ——— NOTIFICHE SCADENZE ———
+
+    // 1. Chiedo permesso alle notifiche
+    if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+        Notification.requestPermission();
+        }
+    }
+    
+    // 2. Funzione che interroga notifications.php e mostra le notifiche
+    function checkExpiryNotifications() {
+        if (Notification.permission !== 'granted') return;
+      
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '../utility/notification.php', true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              let data;
+              try {
+                data = JSON.parse(xhr.responseText);
+              } catch (e) {
+                return console.error('Risposta JSON non valida', e);
+              }
+              data.forEach(item => {
+                const title = `Prodotto in scadenza`;
+                const body  = `${item.name} scade tra ${item.daysLeft} giorno${item.daysLeft > 1 ? 'i' : ''}.`;
+                const key = `notified_expiry_${item.id}`;
+                if (!localStorage.getItem(key)) {
+                  new Notification(title, { body, icon: '/path/to/icon.png' });
+                  localStorage.setItem(key, '1');
+                }
+              });
+            } else if (xhr.status === 401) {
+              console.error('Non autenticato per le notifiche.');
+            } else {
+              console.error('Errore server notifiche:', xhr.status);
+            }
+          }
+        };
+        xhr.onerror = function() {
+          console.error('Errore di rete durante richiesta notifiche.');
+        };
+        xhr.send();
+    }
+    
+    // 3. Lancio subito al caricamento e poi ogni 6 ore
+    checkExpiryNotifications();
+    setInterval(checkExpiryNotifications, 6 * 60 * 60 * 1000);
+    
+
 
     let html5QrCode = null;
+    window.currentProductId = null;
+
+    // Funzione per mostrare/nascondere il menu delle azioni sui prodotti
+    window.showProductActions = function(productId) {
+        window.currentProductId = productId;
+        
+        const icon = event.target;
+        const rect = icon.getBoundingClientRect();
+        
+        actionsPopup.style.display = 'block';
+        actionsPopup.style.top = rect.bottom + 'px';
+        actionsPopup.style.left = rect.left + 'px';
+        
+        // Aggiungi un evento per chiudere il popup quando si clicca altrove
+        document.addEventListener('click', closeActionsPopup);
+        
+        // Previeni la propagazione dell'evento click per evitare che il popup si chiuda immediatamente
+        event.stopPropagation();
+    };
+    
+    function closeActionsPopup(event) {
+        if (!actionsPopup.contains(event.target) && event.target.className !== 'fas fa-ellipsis-v') {
+            actionsPopup.style.display = 'none';
+            document.removeEventListener('click', closeActionsPopup);
+        }
+    }
+    
+    // Funzioni per le azioni sui prodotti
+    window.consumeProduct = function(productId) {
+        // Qui dovresti implementare la logica per marcare il prodotto come consumato
+        // Per ora simuliamo un successo
+        document.getElementById('product-actions-popup').style.display = 'none';
+        showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
+        
+        // Rimuovi l'elemento dalla lista (simulazione)
+        const productElements = document.querySelectorAll('.product-item');
+        for (let product of productElements) {
+            if (product.querySelector('.product-actions i').getAttribute('onclick').includes(productId)) {
+                product.style.opacity = '0';
+                setTimeout(() => {
+                    product.remove();
+                    checkEmptyList();
+                }, 300);
+                break;
+            }
+        }
+    }
+    
+    window.editProduct = function(productId) {
+        actionsPopup.style.display = 'none';
+        location.href = `../CRUDfun/frigoEdit.php?id=${productId}`;
+    };
+    
+    window.deleteProduct = function(productId) {
+        actionsPopup.style.display = 'none';
+        if (confirm('Sei sicuro di voler eliminare questo prodotto?')) {
+            // Invia una richiesta AJAX per eliminare il prodotto
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '../CRUDfun/frigoDelete.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    const response = JSON.parse(this.responseText);
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                } else {
+                    alert('Si è verificato un errore durante l\'eliminazione del prodotto.');
+                }
+            };
+            xhr.onerror = function() {
+                alert('Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
+            };
+            xhr.send('relation_id=' + productId);
+        }
+    };
 
     function isMobileDevice() {
         return (
@@ -69,8 +200,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!qrData.userId || !Array.isArray(qrData.products)) {
                     return alert('QR code non valido per Gustify.');
                 }
-
-                // PULISCO E POPOLA LA LISTA
+        
+                // Popolo la lista di prodotti scansionati
                 scannedProductsList.innerHTML = '';
                 qrData.products.forEach(p => {
                     const li = document.createElement('li');
@@ -87,10 +218,46 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>`;
                     scannedProductsList.appendChild(li);
                 });
-
-                // MOSTRO IL MESSAGGIO DI SUCCESSO
+        
+                // Chiudo scanner e mostro overlay
                 qrReader.style.display = 'none';
                 successMessage.style.display = 'block';
+        
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '../utility/updateDB_qr.php', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+        
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            let resp;
+                            try {
+                                resp = JSON.parse(xhr.responseText);
+                            } catch {
+                                return alert('Risposta non valida dal server.');
+                            }
+                            if (resp.success) {
+                                console.log('Prodotti aggiunti:', resp.added);
+                                // qui puoi aggiornare dinamicamente la UI o ricaricare la pagina
+                            } else {
+                                alert('Errore: ' + (resp.error || 'Errore sconosciuto'));
+                            }
+                        } else if (xhr.status === 401) {
+                            alert('Devi effettuare il login per aggiungere prodotti.');
+                            window.location.href = '../login/login.php';
+                        } else {
+                            alert('Errore di server (' + xhr.status + '). Riprova più tardi.');
+                        }
+                    }
+                };
+        
+                xhr.onerror = function() {
+                    alert('Errore di rete durante l\'invio dei dati.');
+                };
+        
+                // Preparo il payload: solo l’array products
+                const payload = JSON.stringify({ products: qrData.products });
+                xhr.send(payload);
             });
         }
 
@@ -99,20 +266,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    scanBtn.addEventListener('click', handleScanButton);
+    if (scanBtn) {
+        scanBtn.addEventListener('click', handleScanButton);
+    }
 
-    qrCloseBtn.addEventListener('click', function() {
-        if (html5QrCode) {
-            html5QrCode.stop().catch(() => {});
-        }
-        qrReader.style.display = 'none';
-        overlay.style.display = 'none';
-    });
+    if (qrCloseBtn) {
+        qrCloseBtn.addEventListener('click', function() {
+            if (html5QrCode) {
+                html5QrCode.stop().catch(() => {});
+            }
+            qrReader.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+    }
 
-    successCloseBtn.addEventListener('click', function() {
-        successMessage.style.display = 'none';
-        overlay.style.display = 'none';
-    });
+    if (successCloseBtn) {
+        successCloseBtn.addEventListener('click', function() {
+            successMessage.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+    }
 
     // ——— HELPERS ———
     function getProductIcon(category) {

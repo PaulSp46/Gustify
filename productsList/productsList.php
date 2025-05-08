@@ -18,10 +18,23 @@
             $cognome = "";
         }
 
-        // Recupero prodotti nel frigo dell'utente
-        $sql = "SELECT frigo.idrelation as id, prodotto.des as des, prodotto.marca as marca, prodotto.categoria as categoria, frigo.quantita as quantita, frigo.scadenza as scadenza, frigo.note as note
-                FROM prodotto, frigo
-                WHERE frigo.utente_idutente = :idutente AND frigo.prodotto_idprodotto = prodotto.idprodotto";
+        // Recupero prodotti nel frigo dell'utente con dati personalizzati
+        $sql = "SELECT 
+                frigo.idrelation as id, 
+                COALESCE(pp.des, prodotto.des) as des, 
+                COALESCE(pp.marca, prodotto.marca) as marca, 
+                COALESCE(pp.categoria, prodotto.categoria) as categoria, 
+                frigo.quantita as quantita, 
+                frigo.scadenza as scadenza, 
+                frigo.note as note,
+                frigo.data_creazione as data_aggiunta,
+                prodotto.verified as verified
+                FROM frigo
+                JOIN prodotto ON frigo.prodotto_idprodotto = prodotto.idprodotto
+                LEFT JOIN prodotto_personalizzato pp ON pp.prodotto_idprodotto = prodotto.idprodotto 
+                                              AND pp.utente_idutente = frigo.utente_idutente
+                WHERE frigo.utente_idutente = :idutente
+                ORDER BY frigo.scadenza ASC";
         
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(":idutente", $_SESSION["user_id"]);
@@ -148,14 +161,23 @@
                 foreach ($products as $product):
                     $expiryClass = getExpiryClass($product['scadenza']);
                     $categoryIcon = getCategoryIcon($product['categoria']);
+                    $verifiedClass = isset($product['verified']) && $product['verified'] ? 'verified-product' : '';
+                    $addedDate = isset($product['data_aggiunta']) ? 
+                                 (new DateTime($product['data_aggiunta']))->format('d/m/Y') : 'N/D';
             ?>
-            <div class="product-card" data-category="<?php echo htmlspecialchars($product['categoria']); ?>" data-expiry="<?php echo $expiryClass; ?>">
+            <div class="product-card <?php echo $verifiedClass; ?>" data-category="<?php echo htmlspecialchars($product['categoria']); ?>" data-expiry="<?php echo $expiryClass; ?>">
                 <div class="product-category">
                     <i class="fas <?php echo $categoryIcon; ?>"></i>
+                    <?php if (isset($product['verified']) && $product['verified']): ?>
+                        <span class="verified-badge" title="Prodotto verificato"><i class="fas fa-check-circle"></i></span>
+                    <?php endif; ?>
                 </div>
                 <h3 class="product-title"><?php echo htmlspecialchars($product['des']); ?></h3>
                 <div class="product-quantity">
                     Confezioni: <?php echo htmlspecialchars($product['quantita']); ?>
+                </div>
+                <div class="product-added-date">
+                    Aggiunto il: <?php echo $addedDate; ?>
                 </div>
                 <?php
                     if ($product["marca"] != null) {

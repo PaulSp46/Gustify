@@ -5,11 +5,20 @@
     } else{
         include "../utility/database.php";
 
-        // Recupero prodotti nel frigo dell'utente, ordinati per data di scadenza
-        $sql = "SELECT prodotto.des as des, prodotto.categoria as categoria, frigo.quantita as quantita, 
-                frigo.scadenza as scadenza, frigo.idrelation as id
-                FROM prodotto, frigo
-                WHERE frigo.utente_idutente = :idutente AND frigo.prodotto_idprodotto = prodotto.idprodotto
+        // Recupero prodotti nel frigo dell'utente, ordinati per data di scadenza con dati personalizzati quando disponibili
+        $sql = "SELECT 
+                COALESCE(pp.des, prodotto.des) as des, 
+                COALESCE(pp.categoria, prodotto.categoria) as categoria, 
+                frigo.quantita as quantita, 
+                frigo.scadenza as scadenza, 
+                frigo.idrelation as id,
+                frigo.data_creazione as data_aggiunta,
+                prodotto.verified as verified
+                FROM frigo
+                JOIN prodotto ON frigo.prodotto_idprodotto = prodotto.idprodotto
+                LEFT JOIN prodotto_personalizzato pp ON pp.prodotto_idprodotto = prodotto.idprodotto 
+                                              AND pp.utente_idutente = frigo.utente_idutente
+                WHERE frigo.utente_idutente = :idutente
                 ORDER BY frigo.scadenza ASC";
 
         $stmt = $conn->prepare($sql);
@@ -153,11 +162,15 @@
                         
                         $expiryClass = getExpiryClass($product['scadenza']);
                         $categoryIcon = getProductIcon($product['categoria']);
+                        $verifiedClass = isset($product['verified']) && $product['verified'] ? 'verified-product' : '';
                         ?>
-                        <li class="product-item">
+                        <li class="product-item <?php echo $verifiedClass; ?>">
                             <div class="product-info">
                                 <div class="product-icon">
                                     <i class="fas <?php echo $categoryIcon; ?>"></i>
+                                    <?php if (isset($product['verified']) && $product['verified']): ?>
+                                        <span class="verified-badge" title="Prodotto verificato"><i class="fas fa-check-circle"></i></span>
+                                    <?php endif; ?>
                                 </div>
                                 <div>
                                     <div class="product-name"><?php echo htmlspecialchars($product['des']); ?></div>

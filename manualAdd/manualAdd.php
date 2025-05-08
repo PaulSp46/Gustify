@@ -25,69 +25,102 @@
                 $messageType = "error";
             } else {
                 try {
+                    $conn->beginTransaction();
+                    
+                    // Verifica se esiste già un prodotto con questo barcode
                     $sql = "SELECT idprodotto FROM prodotto WHERE bar_code = :bar_code";
                     $stmt = $conn->prepare($sql);
                     $stmt->bindParam(":bar_code", $bar_code);
                     $stmt->execute();
-                    $data = $stmt->fetchAll();
+                    $existingProduct = $stmt->fetch(PDO::FETCH_ASSOC);
                     
-                    if (empty($data)) {
-                        $sql = "INSERT INTO prodotto (des, categoria, marca, bar_code)
-                                VALUES (:des, :categoria, :marca, :bar_code)";
-                        $stmt = $conn->prepare($sql);
-
+                    $idprodotto = null;
+                    
+                    if ($existingProduct) {
+                        // Il prodotto esiste già nel database globale
+                        $idprodotto = $existingProduct['idprodotto'];
+                        
+                        // Verifica se l'utente ha una versione personalizzata
+                        $stmt = $conn->prepare("SELECT id FROM prodotto_personalizzato 
+                                              WHERE prodotto_idprodotto = :idprodotto AND utente_idutente = :idutente");
+                        $stmt->bindParam(":idprodotto", $idprodotto);
+                        $stmt->bindParam(":idutente", $_SESSION["user_id"]);
+                        $stmt->execute();
+                        $personalProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        if ($personalProduct) {
+                            // Aggiorna la versione personalizzata
+                            $stmt = $conn->prepare("UPDATE prodotto_personalizzato 
+                                                 SET des = :des, categoria = :categoria, marca = :marca, note = :note 
+                                                 WHERE id = :id");
+                            $stmt->bindParam(":des", $descrizione);
+                            $stmt->bindParam(":categoria", $categoria);
+                            $stmt->bindParam(":marca", $marca);
+                            $stmt->bindParam(":note", $note);
+                            $stmt->bindParam(":id", $personalProduct['id']);
+                            $stmt->execute();
+                        } else {
+                            // Crea versione personalizzata
+                            $stmt = $conn->prepare("INSERT INTO prodotto_personalizzato 
+                                                  (prodotto_idprodotto, utente_idutente, des, categoria, marca, note) 
+                                                  VALUES (:idprodotto, :idutente, :des, :categoria, :marca, :note)");
+                            $stmt->bindParam(":idprodotto", $idprodotto);
+                            $stmt->bindParam(":idutente", $_SESSION["user_id"]);
+                            $stmt->bindParam(":des", $descrizione);
+                            $stmt->bindParam(":categoria", $categoria);
+                            $stmt->bindParam(":marca", $marca);
+                            $stmt->bindParam(":note", $note);
+                            $stmt->execute();
+                        }
+                    } else {
+                        // Crea un nuovo prodotto globale ma marcato come 'manual' e non verificato
+                        $stmt = $conn->prepare("INSERT INTO prodotto 
+                                              (des, categoria, marca, bar_code, created_by, source, verified) 
+                                              VALUES (:des, :categoria, :marca, :bar_code, :created_by, 'manual', false)");
                         $stmt->bindParam(":des", $descrizione);
                         $stmt->bindParam(":categoria", $categoria);
                         $stmt->bindParam(":marca", $marca);
                         $stmt->bindParam(":bar_code", $bar_code);
-
+                        $stmt->bindParam(":created_by", $_SESSION["user_id"]);
                         $stmt->execute();
-
-                        $sql = "SELECT idprodotto FROM prodotto WHERE bar_code = :bar_code";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bindParam(":bar_code", $bar_code);
-                        $stmt->execute();
-                        $data = $stmt->fetchAll();
+                        
+                        $idprodotto = $conn->lastInsertId();
                     }
-
-                    $idprodotto = $data[0]["idprodotto"];
-
-                    $sql = "SELECT * FROM frigo WHERE utente_idutente = :idutente AND prodotto_idprodotto = :idprodotto";
                     
-                    $stmt = $conn->prepare($sql);
+                    // Aggiungi o aggiorna il prodotto nel frigo dell'utente
+                    $stmt = $conn->prepare("SELECT idrelation FROM frigo 
+                                          WHERE utente_idutente = :idutente AND prodotto_idprodotto = :idprodotto");
                     $stmt->bindParam(":idutente", $_SESSION["user_id"]);
                     $stmt->bindParam(":idprodotto", $idprodotto);
-                    
                     $stmt->execute();
-                    $data = $stmt->fetchAll();
-
-                    if (empty($data)) {
-                        $sql = "INSERT INTO frigo (prodotto_idprodotto, utente_idutente, quantita, scadenza, note)
-                            VALUES (:idprodotto, :idutente, :quantita, :scadenza, :note)";
-
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bindParam(":idprodotto", $idprodotto); 
+                    $frigoProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($frigoProduct) {
+                        // Aggiorna quantità
+                        $stmt = $conn->prepare("UPDATE frigo SET quantita = quantita + :quantita 
+                                              WHERE idrelation = :idrelation");
+                        $stmt->bindParam(":quantita", $quantita);
+                        $stmt->bindParam(":idrelation", $frigoProduct['idrelation']);
+                        $stmt->execute();
+                    } else {
+                        // Inserisci nuovo record con data_creazione
+                        $stmt = $conn->prepare("INSERT INTO frigo 
+                                              (prodotto_idprodotto, utente_idutente, quantita, scadenza, note, data_creazione) 
+                                              VALUES (:idprodotto, :idutente, :quantita, :scadenza, :note, CURRENT_TIMESTAMP)");
+                        $stmt->bindParam(":idprodotto", $idprodotto);
                         $stmt->bindParam(":idutente", $_SESSION["user_id"]);
                         $stmt->bindParam(":quantita", $quantita);
                         $stmt->bindParam(":scadenza", $data_scadenza);
                         $stmt->bindParam(":note", $note);
-
-                        $stmt->execute();
-                    } else{
-                        $sql = "UPDATE frigo SET quantita = quantita + :quantita 
-                                WHERE utente_idutente = :idutente AND prodotto_idprodotto = :idprodotto";
-                        
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bindParam(":idprodotto", $idprodotto); 
-                        $stmt->bindParam(":idutente", $_SESSION["user_id"]);
-                        $stmt->bindParam(":quantita", $quantita);
-
                         $stmt->execute();
                     }
-
+                    
+                    $conn->commit();
                     $message = "Prodotto aggiunto con successo!";
                     $messageType = "success";
+                    
                 } catch(PDOException $e) {
+                    $conn->rollBack();
                     $message = "Errore durante l'aggiunta del prodotto: " . $e->getMessage();
                     $messageType = "error";
                 }

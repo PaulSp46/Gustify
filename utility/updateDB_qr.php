@@ -45,9 +45,9 @@ try {
         $idprodotto = null;
         
         if (!$existing) {
-            // 2. Se non esiste, inseriscilo nella tabella 'prodotto'
-            $sql = "INSERT INTO prodotto (des, categoria, bar_code, marca) 
-                    VALUES (:des, :categoria, :bar_code, :marca)";
+            // 2. Se non esiste, inseriscilo nella tabella 'prodotto' (ora con i nuovi campi)
+            $sql = "INSERT INTO prodotto (des, categoria, bar_code, marca, created_by, source, verified) 
+                    VALUES (:des, :categoria, :bar_code, :marca, :created_by, 'qr', true)";
             $stmt = $conn->prepare($sql);
             
             $stmt->bindParam(":des", $product['name']);
@@ -55,6 +55,7 @@ try {
             $stmt->bindParam(":bar_code", $product['bar_code']);
             $marca = isset($product['marca']) ? $product['marca'] : null; // Valore predefinito se non presente
             $stmt->bindParam(":marca", $marca);
+            $stmt->bindParam(":created_by", $_SESSION["user_id"]);
             
             $stmt->execute();
             
@@ -79,20 +80,23 @@ try {
             $sql = "UPDATE frigo SET quantita = quantita + :quantita 
                     WHERE utente_idutente = :idutente AND prodotto_idprodotto = :idprodotto";
             $stmt = $conn->prepare($sql);
+            $stmt->bindParam(":idprodotto", $idprodotto);
+            $stmt->bindParam(":idutente", $_SESSION["user_id"]);
+            $stmt->bindParam(":quantita", $product['quantita']);
+            $stmt->execute();
         } else {
-            // Se non esiste, inseriscilo
-            $sql = "INSERT INTO frigo (prodotto_idprodotto, utente_idutente, quantita, scadenza, note)
-                    VALUES (:idprodotto, :idutente, :quantita, :scadenza, :note)";
+            // Se non esiste, inseriscilo con data_creazione
+            $sql = "INSERT INTO frigo (prodotto_idprodotto, utente_idutente, quantita, scadenza, note, data_creazione)
+                    VALUES (:idprodotto, :idutente, :quantita, :scadenza, :note, CURRENT_TIMESTAMP)";
             $stmt = $conn->prepare($sql);
+            $stmt->bindParam(":idprodotto", $idprodotto);
+            $stmt->bindParam(":idutente", $_SESSION["user_id"]);
+            $stmt->bindParam(":quantita", $product['quantita']);
             $stmt->bindParam(":scadenza", $product['expiryDate']);
             $note = isset($product['note']) ? $product['note'] : null;
             $stmt->bindParam(":note", $note);
+            $stmt->execute();
         }
-        
-        $stmt->bindParam(":idprodotto", $idprodotto);
-        $stmt->bindParam(":idutente", $_SESSION["user_id"]);
-        $stmt->bindParam(":quantita", $product['quantita']);
-        $stmt->execute();
         
         $added++;
     }

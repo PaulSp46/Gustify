@@ -45,8 +45,8 @@ body {
     flex-direction: column;
     min-height: 100vh;
     background-image: 
-        radial-gradient(circle at 10% 20%, rgba(76, 175, 80, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 90% 80%, rgba(76, 175, 80, 0.03) 0%, transparent 50%);
+        radial-gradient(circle at 10% 20%, rgba(76, 175, 80, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(76, 175, 80, 0.05) 0%, transparent 50%);
 }
 
 /* Scrollbar personalizzata */
@@ -62,6 +62,7 @@ body {
 ::-webkit-scrollbar-thumb {
     background: var(--primary-light);
     border-radius: 10px;
+    transition: var(--transition);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -76,6 +77,11 @@ header {
     top: 0;
     z-index: 100;
     border-bottom: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+header.scrolled {
+    box-shadow: var(--shadow-md);
 }
 
 nav {
@@ -100,8 +106,8 @@ nav {
 }
 
 .logo:hover {
-    color: var(--primary-dark);
     transform: scale(1.05);
+    color: var(--primary-dark);
 }
 
 .logo i {
@@ -115,6 +121,7 @@ nav {
     justify-content: center;
     align-items: center;
     padding: 2rem;
+    animation: fadeIn 0.5s ease;
 }
 
 /* Form di login */
@@ -129,6 +136,7 @@ nav {
     position: relative;
     overflow: hidden;
     transition: var(--transition);
+    animation: fadeUp 0.7s ease forwards;
 }
 
 .login-form:hover {
@@ -145,6 +153,11 @@ nav {
     height: 4px;
     background: var(--primary-gradient);
     border-radius: var(--rounded-lg) var(--rounded-lg) 0 0;
+    transition: var(--transition);
+}
+
+.login-form:hover::before {
+    height: 6px;
 }
 
 .form-header {
@@ -158,6 +171,20 @@ nav {
     font-weight: 700;
     color: var(--text-dark);
     margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+}
+
+.form-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: var(--primary-gradient);
+    border-radius: 10px;
 }
 
 .form-header p {
@@ -167,14 +194,16 @@ nav {
 
 .form-group {
     margin-bottom: 1.5rem;
+    position: relative;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     color: var(--text-dark);
     font-weight: 500;
     font-size: 0.95rem;
+    transition: var(--transition);
 }
 
 .input-group {
@@ -206,7 +235,7 @@ nav {
 .input-group input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
 }
 
 .input-group input:focus + i,
@@ -241,21 +270,21 @@ nav {
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: var(--transition);
+    transition: none;
 }
 
 .login-btn:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-md);
 }
 
 .login-btn:hover::before {
     left: 100%;
-    transition: 0.7s;
+    transition: 0.5s ease;
 }
 
 .login-btn:active {
-    transform: translateY(0);
+    transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
 }
 
@@ -277,101 +306,23 @@ nav {
     text-decoration: underline;
 }
 
-/* Aggiunte per il recupero password */
-.forgot-password {
-    text-align: right;
-    margin-bottom: 1rem;
-}
-
-.forgot-password a {
-    color: var(--text-medium);
-    font-size: 0.85rem;
-    text-decoration: none;
-    transition: var(--transition);
-}
-
-.forgot-password a:hover {
-    color: var(--primary-color);
-    text-decoration: underline;
-}
-
-/* Divisore per login sociale */
-.social-divider {
-    display: flex;
-    align-items: center;
-    margin: 2rem 0;
-}
-
-.social-divider span {
-    flex-grow: 1;
-    height: 1px;
-    background-color: var(--border-color);
-}
-
-.social-divider p {
-    padding: 0 1rem;
-    color: var(--text-medium);
-    font-size: 0.9rem;
-}
-
-/* Pulsanti social */
-.social-login {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-.social-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background-color: var(--bg-white);
-    border: 1px solid var(--border-color);
-    border-radius: var(--rounded-md);
-    color: var(--text-dark);
-    font-size: 0.95rem;
-    transition: var(--transition);
-    cursor: pointer;
-}
-
-.social-btn:hover {
-    background-color: var(--bg-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.social-btn i {
-    font-size: 1.1rem;
-}
-
-.social-btn.google i {
-    color: #DB4437;
-}
-
-.social-btn.facebook i {
-    color: #4267B2;
-}
-
 /* Toast di errore */
 .toast {
     position: fixed;
     top: 1rem;
     right: 1rem;
     padding: 1rem 1.5rem;
-    background-color: var(--bg-white);
-    border-left: 4px solid var(--error-color);
     border-radius: var(--rounded-md);
     box-shadow: var(--shadow-lg);
     display: flex;
     align-items: center;
     gap: 1rem;
     transform: translateX(150%);
-    transition: transform 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 1000;
     max-width: 350px;
+    background-color: var(--bg-white);
+    border-left: 4px solid var(--error-color);
 }
 
 .toast.show {
@@ -408,29 +359,18 @@ nav {
 
 .toast-close:hover {
     color: var(--text-dark);
+    transform: rotate(90deg);
 }
 
 /* Animazioni */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease forwards;
-}
-
-/* Password toggle */
-.password-toggle {
-    position: absolute;
-    right: 1rem;
-    cursor: pointer;
-    color: var(--text-light);
-    transition: var(--transition);
-}
-
-.password-toggle:hover {
-    color: var(--primary-color);
 }
 
 /* Footer */
@@ -446,6 +386,10 @@ footer {
 
 /* Responsive design */
 @media (max-width: 768px) {
+    nav {
+        padding: 1rem;
+    }
+    
     .container {
         padding: 1.5rem 1rem;
     }
@@ -456,10 +400,6 @@ footer {
     
     .form-header h1 {
         font-size: 1.75rem;
-    }
-    
-    .social-login {
-        flex-direction: column;
     }
 }
 

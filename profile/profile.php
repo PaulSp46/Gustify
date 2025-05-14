@@ -104,7 +104,7 @@ try {
             <ul class="nav-links">
                 <li><a href="../dashboard/dashboard.php"><i class="fa fa-dashboard"></i> Dashboard</a></li>
                 <li><a href="../productsList/productsList.php"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
-                <li><a href="profile.php"><i class="fas fa-user"></i> Profilo</a></li>
+                <li><a href="profile.php" class="active"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
                 <i class="fas fa-bars"></i>

@@ -17,7 +17,6 @@
             <nav class="main-nav">
                 <ul>
                     <li><a href="#features">Funzionalità</a></li>
-                    <li><a href="#app">App</a></li>
                     <li><a href="#contatti">Contatti</a></li>
                     <li><a href="manual/manual.html">Manuale d'uso</a></li>
                     <li id="login-container" style="display: none;"><a href="login/login.html" class="btn btn-secondary" id="login-button">Accedi</a></li>
@@ -165,7 +164,7 @@
             <div class="footer-links">
                 <h3>Supporto</h3>
                 <ul>
-                    <li><a href="#">FAQ</a></li>
+                    <li><a href="manual/manual.html">FAQ</a></li>
                     <li><a href="#">Centro Assistenza</a></li>
                     <li><a href="#">Contattaci</a></li>
                 </ul>

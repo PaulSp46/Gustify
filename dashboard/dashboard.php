@@ -181,8 +181,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="product-actions">
-                                <i class="fas fa-ellipsis-v" onclick="showProductActions(<?php echo $product['id']; ?>, event)"></i>
+                            <div class="product-actions" onclick="showProductActions(<?php echo $product['id']; ?>, event)">
+                                <i class="fas fa-ellipsis-v"></i>
                             </div>
                         </li>
                         <?php

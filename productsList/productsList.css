@@ -493,7 +493,6 @@ nav {
 .expiry-critical {
     color: var(--error-color);
     font-weight: 600;
-    animation: pulse 2s infinite;
 }
 
 .product-actions {

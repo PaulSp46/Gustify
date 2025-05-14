@@ -60,38 +60,6 @@ try {
     <!-- External CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="profile.css">
-    
-    <!-- Inline CSS for alerts - consider moving to profile.css -->
-    <style>
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .alert-close {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: inherit;
-        }
-    </style>
 </head>
 <body>
     <!-- Header & Navigation -->
@@ -293,6 +261,25 @@ try {
         <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
     </footer>
     
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="logout-modal">
+        <div class="modal-container">
+            <div class="modal-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <div class="modal-title">Conferma Logout</div>
+            <div class="modal-message">Sei sicuro di voler effettuare il logout dall'applicazione?</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-logout-btn">
+                    <i class="fas fa-times"></i> Annulla
+                </button>
+                <button class="modal-btn modal-btn-primary" id="confirm-logout-btn">
+                    <i class="fas fa-check"></i> Conferma
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <!-- JavaScript for Interactivity -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -306,6 +293,11 @@ try {
             const alertCloseButtons = document.querySelectorAll('.alert-close');
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirm_password');
+            
+            // Logout Modal Elements
+            const logoutModal = document.getElementById('logout-modal');
+            const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
+            const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
             
             // Alert Close Functionality
             alertCloseButtons.forEach(function(button) {
@@ -333,10 +325,26 @@ try {
                 }
             });
             
-            // Logout Confirmation
+            // Logout Confirmation with Modal
             logoutBtn.addEventListener('click', function() {
-                if (confirm('Sei sicuro di voler effettuare il logout?')) {
-                    window.location.href = '../login/logout.php';
+                // Show the logout confirmation modal
+                logoutModal.classList.add('show');
+            });
+            
+            // Cancel Logout
+            cancelLogoutBtn.addEventListener('click', function() {
+                logoutModal.classList.remove('show');
+            });
+            
+            // Confirm Logout
+            confirmLogoutBtn.addEventListener('click', function() {
+                window.location.href = '../login/logout.php';
+            });
+            
+            // Close modal if clicking outside
+            logoutModal.addEventListener('click', function(e) {
+                if (e.target === logoutModal) {
+                    logoutModal.classList.remove('show');
                 }
             });
             

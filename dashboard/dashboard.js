@@ -74,31 +74,12 @@ window.deleteProduct = function(productId) {
     var actionsPopup = document.getElementById('product-actions-popup');
     actionsPopup.style.display = 'none';
     
-    if (confirm('Sei sicuro di voler eliminare questo prodotto?')) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '../CRUDfun/frigoDelete.php', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-            if (this.status === 200) {
-                try {
-                    var response = JSON.parse(this.responseText);
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert(response.message || 'Si è verificato un errore durante l\'eliminazione del prodotto.');
-                    }
-                } catch (e) {
-                    alert('Si è verificato un errore durante l\'elaborazione della risposta.');
-                }
-            } else {
-                alert('Si è verificato un errore durante l\'eliminazione del prodotto.');
-            }
-        };
-        xhr.onerror = function() {
-            alert('Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
-        };
-        xhr.send('relation_id=' + productId);
-    }
+    // Store the product ID for the modal
+    window.productToDelete = productId;
+    
+    // Show the delete confirmation modal
+    var deleteModal = document.getElementById('delete-confirmation-modal');
+    deleteModal.classList.add('show');
 };
 
 // Funzione utility per i toast
@@ -141,6 +122,64 @@ document.addEventListener('DOMContentLoaded', function() {
     const scannedProductsList = document.getElementById('scanned-products');
     const actionsPopup = document.getElementById('product-actions-popup');
     const toastCloseBtn = document.querySelector('.toast-close');
+    
+    // Delete confirmation modal elements
+    const deleteModal = document.getElementById('delete-confirmation-modal');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+    // Handler for cancel delete button
+    if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', function() {
+            deleteModal.classList.remove('show');
+            window.productToDelete = null;
+        });
+    }
+    
+    // Handler for confirm delete button
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function() {
+            if (window.productToDelete) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '../CRUDfun/frigoDelete.php', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        try {
+                            var response = JSON.parse(this.responseText);
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                showToast('Errore', response.message || 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                            }
+                        } catch (e) {
+                            showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.');
+                        }
+                    } else {
+                        showToast('Errore', 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                    }
+                };
+                xhr.onerror = function() {
+                    showToast('Errore', 'Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
+                };
+                xhr.send('relation_id=' + window.productToDelete);
+                
+                // Hide the modal
+                deleteModal.classList.remove('show');
+                window.productToDelete = null;
+            }
+        });
+    }
+    
+    // Close modal when clicking outside
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove('show');
+                window.productToDelete = null;
+            }
+        });
+    }
 
     let html5QrCode = null;
 

@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const successCloseBtn = document.getElementById('success-close-btn');
     const scannedProductsList = document.getElementById('scanned-products');
     const actionsPopup = document.getElementById('product-actions-popup');
+    const deleteModal = document.getElementById('delete-confirmation-modal');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    let productToDelete = null;
 
     // ——— NOTIFICHE SCADENZE ———
 
@@ -58,8 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
     checkExpiryNotifications();
     setInterval(checkExpiryNotifications, 6 * 60 * 60 * 1000);
     
-
-
     let html5QrCode = null;
     window.currentProductId = null;
 
@@ -70,19 +72,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const icon = event.target;
         const rect = icon.getBoundingClientRect();
         
-        actionsPopup.style.display = 'block';
-        actionsPopup.style.top = rect.bottom + 'px';
-        actionsPopup.style.left = rect.left + 'px';
-        
-        // Aggiungi un evento per chiudere il popup quando si clicca altrove
-        document.addEventListener('click', closeActionsPopup);
+        if (actionsPopup) {
+            actionsPopup.style.display = 'block';
+            actionsPopup.style.top = rect.bottom + 'px';
+            actionsPopup.style.left = rect.left + 'px';
+            
+            // Aggiungi un evento per chiudere il popup quando si clicca altrove
+            document.addEventListener('click', closeActionsPopup);
+        }
         
         // Previeni la propagazione dell'evento click per evitare che il popup si chiuda immediatamente
         event.stopPropagation();
     };
     
     function closeActionsPopup(event) {
-        if (!actionsPopup.contains(event.target) && event.target.className !== 'fas fa-ellipsis-v') {
+        if (actionsPopup && !actionsPopup.contains(event.target) && event.target.className !== 'fas fa-ellipsis-v') {
             actionsPopup.style.display = 'none';
             document.removeEventListener('click', closeActionsPopup);
         }
@@ -92,7 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.consumeProduct = function(productId) {
         // Qui dovresti implementare la logica per marcare il prodotto come consumato
         // Per ora simuliamo un successo
-        document.getElementById('product-actions-popup').style.display = 'none';
+        if (actionsPopup) {
+            actionsPopup.style.display = 'none';
+        }
         showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
         
         // Rimuovi l'elemento dalla lista (simulazione)
@@ -110,35 +116,74 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     window.editProduct = function(productId) {
-        actionsPopup.style.display = 'none';
+        if (actionsPopup) {
+            actionsPopup.style.display = 'none';
+        }
         location.href = `../CRUDfun/frigoEdit.php?id=${productId}`;
     };
     
     window.deleteProduct = function(productId) {
-        actionsPopup.style.display = 'none';
-        if (confirm('Sei sicuro di voler eliminare questo prodotto?')) {
-            // Invia una richiesta AJAX per eliminare il prodotto
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '../CRUDfun/frigoDelete.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onload = function() {
-                if (this.status === 200) {
-                    const response = JSON.parse(this.responseText);
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert(response.message);
-                    }
-                } else {
-                    alert('Si è verificato un errore durante l\'eliminazione del prodotto.');
-                }
-            };
-            xhr.onerror = function() {
-                alert('Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
-            };
-            xhr.send('relation_id=' + productId);
+        if (actionsPopup) {
+            actionsPopup.style.display = 'none';
+        }
+        
+        // Store the product ID for later use
+        productToDelete = productId;
+        
+        // Show the delete confirmation modal
+        if (deleteModal) {
+            deleteModal.classList.add('show');
         }
     };
+    
+    // Event listeners for delete modal
+    if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', function() {
+            deleteModal.classList.remove('show');
+            productToDelete = null;
+        });
+    }
+    
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function() {
+            if (productToDelete !== null) {
+                // Send AJAX request to delete the product
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '../CRUDfun/frigoDelete.php', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        const response = JSON.parse(this.responseText);
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            showToast('Errore', response.message || 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                        }
+                    } else {
+                        showToast('Errore', 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                    }
+                };
+                xhr.onerror = function() {
+                    showToast('Errore', 'Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
+                };
+                xhr.send('relation_id=' + productToDelete);
+                
+                // Hide the modal
+                deleteModal.classList.remove('show');
+                productToDelete = null;
+            }
+        });
+    }
+    
+    // Close modal when clicking outside
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove('show');
+                productToDelete = null;
+            }
+        });
+    }
 
     function isMobileDevice() {
         return (
@@ -255,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Errore di rete durante l\'invio dei dati.');
                 };
         
-                // Preparo il payload: solo l’array products
+                // Preparo il payload: solo l'array products
                 const payload = JSON.stringify({ products: qrData.products });
                 xhr.send(payload);
             });
@@ -287,6 +332,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Toast notification
+    function showToast(title, message, type = 'success') {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        const toastTitle = toast.querySelector('.toast-title');
+        const toastMessage = toast.querySelector('.toast-message');
+        const toastIcon = toast.querySelector('.toast-icon i');
+        
+        toast.className = 'toast ' + type;
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        if (type === 'success') {
+            toastIcon.className = 'fas fa-check-circle';
+        } else {
+            toastIcon.className = 'fas fa-exclamation-circle';
+        }
+        
+        toast.classList.add('show');
+        
+        // Hide toast after 5 seconds
+        setTimeout(() => toast.classList.remove('show'), 5000);
+    }
+
+    // Function to check if the list is empty
+    function checkEmptyList() {
+        const productList = document.querySelector('.product-list');
+        if (productList && productList.children.length === 0) {
+            const emptyMessage = document.createElement('li');
+            emptyMessage.className = 'empty-message';
+            emptyMessage.textContent = 'Nessun prodotto nel tuo frigo.';
+            productList.appendChild(emptyMessage);
+        }
+    }
+
     // ——— HELPERS ———
     function getProductIcon(category) {
         const icons = {
@@ -310,6 +391,14 @@ document.addEventListener('DOMContentLoaded', function() {
             year: 'numeric'
         });
     }
+
+    // Function to close toast
+    window.closeToast = function() {
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.classList.remove('show');
+        }
+    };
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -353,72 +442,6 @@ document.addEventListener('DOMContentLoaded', function() {
         expiryFilter.addEventListener('change', filterProducts);
         searchBox.addEventListener('input', filterProducts);
     }
-    
-    // Funzioni per le azioni sui prodotti
-    window.consumeProduct = function(productId) {
-        if (confirm('Vuoi segnare questo prodotto come consumato?')) {
-            // TODO: Implementare la logica AJAX per segnare un prodotto come consumato
-            console.log(`Prodotto ${productId} consumato`);
-        }
-    };
-    
-    window.editProduct = function(productId) {
-        // Modifica questa riga:
-        // location.href = `../manualAdd/manualAdd.php?edit=${productId}`;
-        // A:
-        location.href = `../CRUDfun/frigoEdit.php?id=${productId}`;
-    };
-    
-    window.deleteProduct = function(relationId) {
-        if (confirm('Sei sicuro di voler eliminare questo prodotto?')) {
-            // Invia una richiesta AJAX per eliminare il prodotto
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '../CRUDfun/frigoDelete.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onload = function() {
-                if (this.status === 200) {
-                    const response = JSON.parse(this.responseText);
-                    if (response.success) {
-                        // Se l'eliminazione è avvenuta con successo, rimuovi la card del prodotto
-                        const productCard = document.querySelector(`.product-card[data-id="${relationId}"]`);
-                        if (productCard) {
-                            productCard.remove();
-                        }
-                        
-                        // Se non ci sono più prodotti, mostra il messaggio "frigo vuoto"
-                        const remainingProducts = document.querySelectorAll('.product-card');
-                        if (remainingProducts.length === 0) {
-                            const productGrid = document.getElementById('product-grid');
-                            if (productGrid) {
-                                productGrid.innerHTML = `
-                                    <div class="empty-fridge">
-                                        <i class="fas fa-box-open"></i>
-                                        <h3>Il tuo frigo è vuoto!</h3>
-                                        <p>Aggiungi i tuoi prodotti alimentari per iniziare a monitorare le scadenze e ottimizzare i consumi.</p>
-                                        <button class="manual-btn" onclick="location.href='../manualAdd/manualAdd.php'">
-                                            <i class="fa fa-plus"></i>
-                                            Aggiungi prodotti
-                                        </button>
-                                    </div>
-                                `;
-                            }
-                        }
-
-                        location.reload();
-                    } else {
-                        // Mostra un messaggio di errore
-                        alert(response.message);
-                    }
-                } else {
-                    alert('Si è verificato un errore durante l\'eliminazione del prodotto.');
-                }
-            };
-            xhr.onerror = function() {
-                alert('Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
-            };
-            xhr.send('relation_id=' + relationId);
-        }
-    };
 });
 
 function toggleNote(element) {

@@ -222,7 +222,7 @@
     <!-- Product Actions Popup -->
     <div class="product-actions-popup" id="product-actions-popup">
         <button onclick="editProduct(currentProductId)"><i class="fas fa-edit"></i> Modifica</button>
-        <!--<button onclick="consumeProduct(currentProductId)"><i class="fas fa-utensils"></i> Consumato</button>-->
+        <button onclick="consumeProduct(currentProductId)"><i class="fas fa-utensils"></i> Consumato</button>
         <button onclick="deleteProduct(currentProductId)"><i class="fas fa-trash"></i> Elimina</button>
     </div>
     
@@ -237,6 +237,25 @@
         </div>
         <div class="toast-close">
             <i class="fas fa-times"></i>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-confirmation-modal">
+        <div class="modal-container">
+            <div class="modal-icon">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <div class="modal-title">Conferma eliminazione</div>
+            <div class="modal-message">Sei sicuro di voler eliminare questo prodotto dal tuo frigo? Questa azione non può essere annullata.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-delete-btn">
+                    <i class="fas fa-times"></i> Annulla
+                </button>
+                <button class="modal-btn modal-btn-danger" id="confirm-delete-btn">
+                    <i class="fas fa-trash-alt"></i> Elimina
+                </button>
+            </div>
         </div>
     </div>
 </body>

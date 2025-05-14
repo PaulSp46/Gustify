@@ -49,135 +49,7 @@
     <title>Il Tuo Frigo - Gustify</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="productsList.css">
-    <style>
-        /* Custom Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(3px);
-        }
-        
-        .modal-overlay.show {
-            opacity: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-container {
-            background-color: var(--bg-white);
-            border-radius: var(--rounded-lg);
-            box-shadow: var(--shadow-xl);
-            width: 90%;
-            max-width: 400px;
-            padding: 1.5rem;
-            transform: scale(0.8);
-            opacity: 0;
-            transition: all 0.3s ease;
-            border: 1px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .modal-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, var(--error-color), #d32f2f);
-            transition: var(--transition);
-        }
-        
-        .modal-overlay.show .modal-container {
-            transform: scale(1);
-            opacity: 1;
-        }
-        
-        .modal-icon {
-            font-size: 3rem;
-            color: var(--error-color);
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: center;
-        }
-        
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            text-align: center;
-            font-family: var(--font-heading);
-        }
-        
-        .modal-message {
-            color: var(--text-medium);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        
-        .modal-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-        }
-        
-        .modal-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--rounded-md);
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            min-width: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .modal-btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-        }
-        
-        .modal-btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .modal-btn-secondary {
-            background-color: var(--bg-gray);
-            color: var(--text-medium);
-            border: 1px solid var(--border-color);
-        }
-        
-        .modal-btn-secondary:hover {
-            background-color: var(--bg-light);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .modal-btn-danger {
-            background: linear-gradient(135deg, var(--error-color), #d32f2f);
-            color: white;
-        }
-        
-        .modal-btn-danger:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-    </style>
+    <link rel="icon" href="../tablogo.png">
 </head>
 <body>
     <header>
@@ -189,6 +61,7 @@
             <ul class="nav-links">
                 <li><a href="../dashboard/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="productsList.php" class="active"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
+                <li><a href="../consumedList/consumedList.php"><i class="fas fa-utensils"></i> Consumati</a></li>
                 <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
@@ -346,9 +219,9 @@
                     <button class="edit-btn" title="Modifica prodotto" onclick="editProduct(<?php echo $product['id']; ?>)">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="delete-btn" title="Elimina prodotto" onclick="deleteProduct(<?php echo $product['id']; ?>)">
+                    <!--<button class="delete-btn" title="Elimina prodotto" onclick="deleteProduct(<?php echo $product['id']; ?>)">
                         <i class="fas fa-trash"></i>
-                    </button>
+                    </button>-->
                 </div>
             </div>
             <?php endforeach; ?>

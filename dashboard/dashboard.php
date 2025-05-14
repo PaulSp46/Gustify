@@ -38,6 +38,7 @@
     <script src="dashboard.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="icon" href="../tablogo.png">
 </head>
 <body>
     <header>
@@ -49,6 +50,7 @@
             <ul class="nav-links">
                 <li><a href="dashboard.php" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="../productsList/productsList.php"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
+                <li><a href="../consumedList/consumedList.php"><i class="fas fa-utensils"></i> Consumati</a></li>
                 <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
@@ -223,7 +225,7 @@
     <div class="product-actions-popup" id="product-actions-popup">
         <button onclick="editProduct(currentProductId)"><i class="fas fa-edit"></i> Modifica</button>
         <button onclick="consumeProduct(currentProductId)"><i class="fas fa-utensils"></i> Consumato</button>
-        <button onclick="deleteProduct(currentProductId)"><i class="fas fa-trash"></i> Elimina</button>
+        <!--<button onclick="deleteProduct(currentProductId)"><i class="fas fa-trash"></i> Elimina</button>-->
     </div>
     
     <!-- Toast Notification -->

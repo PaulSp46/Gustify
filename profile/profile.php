@@ -10,6 +10,42 @@ if (!isset($_SESSION["email"])) {
 // Database connection
 include "../utility/database.php";
 
+// Helper function to get category icon
+function getCategoryIcon($category) {
+    $icons = [
+        'dairy' => 'fa-cheese',
+        'fruit' => 'fa-apple-alt',
+        'vegetable' => 'fa-carrot',
+        'meat' => 'fa-drumstick-bite',
+        'fish' => 'fa-fish',
+        'bakery' => 'fa-bread-slice',
+        'beverage' => 'fa-wine-bottle',
+        'snack' => 'fa-cookie',
+        'cereal' => 'fa-wheat-awn',
+        'other' => 'fa-shopping-basket'
+    ];
+    
+    return isset($icons[$category]) ? $icons[$category] : 'fa-shopping-basket';
+}
+
+// Helper function to get category name
+function getCategoryName($category) {
+    $categories = [
+        'dairy' => 'Latticini',
+        'fruit' => 'Frutta',
+        'vegetable' => 'Verdura',
+        'meat' => 'Carne',
+        'fish' => 'Pesce',
+        'bakery' => 'Prodotti da forno',
+        'beverage' => 'Bevande',
+        'snack' => 'Snack',
+        'cereal' => 'Cereali',
+        'other' => 'Altro'
+    ];
+    
+    return isset($categories[$category]) ? $categories[$category] : 'Altro';
+}
+
 // SECTION: Data Retrieval
 try {
     // 1. Retrieve user data
@@ -32,8 +68,12 @@ try {
     $stats = $stmt_stats->fetch();
     
     // 3. Consumed products query (commented out - in development)
-    /* 
-    $sql_consumed = "SELECT p.des as nome, p.categoria, c.data_consumo 
+    $sql_consumed = "SELECT 
+                        p.des as nome, 
+                        p.categoria, 
+                        c.data_consumo,
+                        c.quantita,
+                        c.note 
                     FROM consumo c
                     JOIN prodotto p ON c.prodotto_idprodotto = p.idprodotto
                     WHERE c.utente_idutente = :idutente
@@ -43,7 +83,6 @@ try {
     $stmt_consumed->bindParam(":idutente", $_SESSION["user_id"]);
     $stmt_consumed->execute();
     $consumed_products = $stmt_consumed->fetchAll();
-    */
 } catch (PDOException $e) {
     // Handle database errors
     $_SESSION["error_message"] = "Errore di database: " . $e->getMessage();
@@ -60,6 +99,7 @@ try {
     <!-- External CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="profile.css">
+    <link rel="icon" href="../tablogo.png">
 </head>
 <body>
     <!-- Header & Navigation -->
@@ -72,6 +112,7 @@ try {
             <ul class="nav-links">
                 <li><a href="../dashboard/dashboard.php"><i class="fa fa-dashboard"></i> Dashboard</a></li>
                 <li><a href="../productsList/productsList.php"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
+                <li><a href="../consumedList/consumedList.php"><i class="fas fa-utensils"></i> Consumati</a></li>
                 <li><a href="profile.php" class="active"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
@@ -204,18 +245,34 @@ try {
                 <div class="profile-section">
                     <div class="section-header">
                         <h2>Ultimi prodotti consumati</h2>
-                        <a href="#" class="view-all">Vedi tutti</a>
+                        <a href="../consumedList/consumedList.php" class="view-all">Vedi tutti</a>
                     </div>
-                    <p>In sviluppo</p>
                     
-                    <!-- Commented out functionality - To be implemented -->
-                    <!--
                     <ul class="product-list consumption-history">
-                        <?php 
-                        // Consumption history implementation - currently commented out
-                        ?>
+                        <?php if (count($consumed_products) > 0): ?>
+                            <?php foreach ($consumed_products as $product): ?>
+                                <li class="product-item">
+                                    <div class="product-info">
+                                        <div class="product-icon">
+                                            <i class="fas <?php echo getCategoryIcon($product['categoria']); ?>"></i>
+                                        </div>
+                                        <div>
+                                            <div class="product-name"><?php echo htmlspecialchars($product['nome']); ?></div>
+                                            <div class="date-info">Consumato il <?php echo (new DateTime($product['data_consumo']))->format('d/m/Y H:i'); ?></div>
+                                            <?php if (!empty($product['note'])): ?>
+                                                <div class="product-note">Note: <?php echo htmlspecialchars($product['note']); ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="category-tag">
+                                        <?php echo getCategoryName($product['categoria']); ?>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li class="empty-message">Nessun prodotto consumato recentemente.</li>
+                        <?php endif; ?>
                     </ul>
-                    -->
                 </div>
                 
                 <!-- Preferences Section -->
@@ -347,8 +404,6 @@ try {
                     logoutModal.classList.remove('show');
                 }
             });
-            
-            // Note: Toggle switch styles are defined in CSS
         });
     </script>
 </body>

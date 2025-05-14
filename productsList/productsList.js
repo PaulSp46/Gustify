@@ -94,26 +94,51 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Funzioni per le azioni sui prodotti
     window.consumeProduct = function(productId) {
-        // Qui dovresti implementare la logica per marcare il prodotto come consumato
-        // Per ora simuliamo un successo
         if (actionsPopup) {
             actionsPopup.style.display = 'none';
         }
-        showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
         
-        // Rimuovi l'elemento dalla lista (simulazione)
-        const productElements = document.querySelectorAll('.product-item');
-        for (let product of productElements) {
-            if (product.querySelector('.product-actions i').getAttribute('onclick').includes(productId)) {
-                product.style.opacity = '0';
-                setTimeout(() => {
-                    product.remove();
-                    checkEmptyList();
-                }, 300);
-                break;
+        // AJAX request to consume the product
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '../CRUDfun/consumeProduct.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (this.status === 200) {
+                try {
+                    const response = JSON.parse(this.responseText);
+                    if (response.success) {
+                        showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
+                        
+                        // Rimuovi l'elemento dalla lista
+                        const productElements = document.querySelectorAll('.product-card');
+                        for (let product of productElements) {
+                            if (product.querySelector('.consume-btn').getAttribute('onclick').includes(productId)) {
+                                product.style.opacity = '0';
+                                setTimeout(() => {
+                                    product.remove();
+                                    // Check if the grid is empty
+                                    if (document.querySelectorAll('.product-card').length === 0) {
+                                        location.reload(); // Reload to show the empty state
+                                    }
+                                }, 300);
+                                break;
+                            }
+                        }
+                    } else {
+                        showToast('Errore', response.message || 'Si è verificato un errore durante il consumo del prodotto.', 'error');
+                    }
+                } catch (e) {
+                    showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.', 'error');
+                }
+            } else {
+                showToast('Errore', 'Si è verificato un errore durante il consumo del prodotto.', 'error');
             }
-        }
-    }
+        };
+        xhr.onerror = function() {
+            showToast('Errore', 'Si è verificato un errore di rete durante il consumo del prodotto.', 'error');
+        };
+        xhr.send('relation_id=' + productId);
+    };
     
     window.editProduct = function(productId) {
         if (actionsPopup) {

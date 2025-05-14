@@ -44,24 +44,51 @@ window.showProductActions = function(productId, e) {
 // Altre funzioni globali necessarie
 window.consumeProduct = function(productId) {
     var actionsPopup = document.getElementById('product-actions-popup');
-    actionsPopup.style.display = 'none';
-    
-    // Trova e rimuovi il prodotto dalla lista
-    var productElements = document.querySelectorAll('.product-item');
-    for (var i = 0; i < productElements.length; i++) {
-        var product = productElements[i];
-        var actionElement = product.querySelector('.product-actions i');
-        if (actionElement && actionElement.getAttribute('onclick').indexOf(productId) > -1) {
-            product.style.opacity = '0';
-            setTimeout(function() {
-                product.remove();
-                checkEmptyList();
-            }, 300);
-            break;
-        }
+    if (actionsPopup) {
+        actionsPopup.style.display = 'none';
     }
     
-    showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
+    // AJAX request to consume the product
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '../CRUDfun/consumeProduct.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        if (this.status === 200) {
+            try {
+                var response = JSON.parse(this.responseText);
+                if (response.success) {
+                    showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
+                    
+                    // Trova e rimuovi il prodotto dalla lista
+                    var productElements = document.querySelectorAll('.product-item');
+                    for (var i = 0; i < productElements.length; i++) {
+                        var product = productElements[i];
+                        var actionElement = product.querySelector('.product-actions');
+                        if (actionElement && actionElement.getAttribute('onclick').indexOf(productId) > -1) {
+                            product.style.opacity = '0';
+                            setTimeout(function(elem) {
+                                return function() {
+                                    elem.remove();
+                                    checkEmptyList();
+                                };
+                            }(product), 300);
+                            break;
+                        }
+                    }
+                } else {
+                    showToast('Errore', response.message || 'Si è verificato un errore durante il consumo del prodotto.', 'error');
+                }
+            } catch (e) {
+                showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.', 'error');
+            }
+        } else {
+            showToast('Errore', 'Si è verificato un errore durante il consumo del prodotto.', 'error');
+        }
+    };
+    xhr.onerror = function() {
+        showToast('Errore', 'Si è verificato un errore di rete durante il consumo del prodotto.', 'error');
+    };
+    xhr.send('relation_id=' + productId);
 };
 
 window.editProduct = function(productId) {
@@ -83,17 +110,34 @@ window.deleteProduct = function(productId) {
 };
 
 // Funzione utility per i toast
-function showToast(title, message) {
+// Funzione utility per i toast
+function showToast(title, message, type) {
     var toast = document.getElementById('toast');
     if (!toast) return;
     
     var toastTitle = toast.querySelector('.toast-title');
     var toastMessage = toast.querySelector('.toast-message');
+    var toastIcon = toast.querySelector('.toast-icon i');
     
     if (toastTitle) toastTitle.textContent = title;
     if (toastMessage) toastMessage.textContent = message;
     
-    toast.classList.add('show');
+    // Update icon based on type
+    if (toastIcon) {
+        toastIcon.className = type === 'error' 
+            ? 'fas fa-exclamation-circle' 
+            : 'fas fa-check-circle';
+    }
+    
+    // Add appropriate class for styling
+    toast.className = 'toast show';
+    if (type === 'error') {
+        toast.style.borderLeftColor = 'var(--error-color)';
+        toastIcon.style.color = 'var(--error-color)';
+    } else {
+        toast.style.borderLeftColor = 'var(--success-color)';
+        toastIcon.style.color = 'var(--success-color)';
+    }
     
     setTimeout(function() {
         toast.classList.remove('show');

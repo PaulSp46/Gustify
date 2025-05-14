@@ -162,6 +162,7 @@
             <ul class="nav-links">
                 <li><a href="../dashboard/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="../productsList/productsList.php"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
+                <li><a href="../consumedList/consumedList.php"><i class="fas fa-utensils"></i> Consumati</a></li>
                 <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
@@ -208,7 +209,6 @@
                         <option value="bakery">Prodotti da forno</option>
                         <option value="beverage">Bevande</option>
                         <option value="snack">Snack</option>
-                        <option value="cereal">Cereali</option>
                         <option value="other">Altro</option>
                     </select>
                 </div>

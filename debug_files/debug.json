@@ -1,0 +1,29 @@
+{
+    "userId": 1,
+    "products": [
+        {
+        "bar_code": "1234567890123",
+        "name": "Yogurt bianco",
+        "category": "dairy",
+        "quantita": 2,
+        "expiryDate": "2025-05-15",
+        "note": "Bianco intero"
+        },
+        {
+        "bar_code": "9781234567897",
+        "name": "Pane integrale",
+        "category": "bakery",
+        "quantita": 1,
+        "expiryDate": "2025-06-01",
+        "note": "Senza glutine"
+        },
+        {
+        "bar_code": "5000159484695",
+        "name": "Mele Golden",
+        "category": "fruit",
+        "quantita": 6,
+        "expiryDate": "2025-05-10",
+        "note": "Bio"
+        }
+    ]
+}

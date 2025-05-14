@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gustify - Accedi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="navigateTo('../index.php')" tabindex="0" role="button" aria-label="Vai alla home">
+                <i class="fas fa-leaf"></i>
+                Gustify
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="login-form fade-in">
+            <div class="form-header">
+                <h1>Benvenuto</h1>
+                <p>Accedi al tuo account Gustify</p>
+            </div>
+            
+            <form id="login-form" method="POST" action="login.php">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <input name="email" type="email" id="email" placeholder="Inserisci la tua email" required autocomplete="email">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <input name="password" type="password" id="password" placeholder="Inserisci la tua password" required autocomplete="current-password">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">Accedi</button>
+                
+                <div class="signup-link">
+                    Non hai un account? <a href="../register/register.html">Registrati</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast di errore -->
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">Errore di accesso</div>
+            <div class="toast-message">Email o password non validi. Riprova.</div>
+        </div>
+        <div class="toast-close" onclick="closeToast()">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
+    </footer>
+    
+    <script>
+        // Navigazione
+        function navigateTo(link) {
+            window.location.replace(link);
+        }
+        
+        // Gestione del toast
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            const toastTitle = toast.querySelector('.toast-title');
+            const toastMessage = toast.querySelector('.toast-message');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            toast.classList.add('show');
+            
+            // Nascondi il toast dopo 5 secondi
+            setTimeout(closeToast, 5000);
+        }
+        
+        function closeToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('show');
+        }
+        
+        // Gestione del form
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            // In una versione di demo, possiamo simulare la validazione lato client
+            
+            // Questa parte andrebbe rimossa in un'implementazione reale dove la validazione è fatta lato server
+            // È solo per scopi dimostrativi
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            
+            if (emailInput.value.trim() === '' || passwordInput.value.trim() === '') {
+                e.preventDefault();
+                showToast('Campi mancanti', 'Compila tutti i campi richiesti.');
+            }
+            
+            // Verifica se c'è un parametro di errore nell'URL (per mostrare errori dopo redirect)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                e.preventDefault();
+                const errorMessage = urlParams.get('error');
+                let message = 'Si è verificato un errore durante l\'accesso.';
+                
+                switch (errorMessage) {
+                    case 'invalid_credentials':
+                        message = 'Email o password non validi. Riprova.';
+                        break;
+                    case 'account_locked':
+                        message = 'Account temporaneamente bloccato. Riprova più tardi.';
+                        break;
+                    case 'not_activated':
+                        message = 'Account non attivato. Controlla la tua email.';
+                        break;
+                }
+                
+                showToast('Errore di accesso', message);
+            }
+        });
+        
+        // Verifica se c'è un parametro di errore nell'URL (al caricamento della pagina)
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                const errorMessage = urlParams.get('error');
+                let message = 'Si è verificato un errore durante l\'accesso.';
+                let title = 'Errore di accesso';
+                
+                switch (errorMessage) {
+                    case 'invalid_credentials':
+                        message = 'Email o password non validi. Riprova.';
+                        break;
+                    case 'account_locked':
+                        message = 'Account temporaneamente bloccato. Riprova più tardi.';
+                        break;
+                    case 'not_activated':
+                        message = 'Account non attivato. Controlla la tua email.';
+                        break;
+                    case 'registration_success':
+                        title = 'Registrazione completata';
+                        message = 'Account creato con successo! Puoi accedere.';
+                        break;
+                }
+                
+                showToast(title, message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gustify - Manuale d'Uso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="manual.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="../index.php" class="logo">
+                <i class="fas fa-leaf"></i>
+                Gustify
+            </a>
+            <ul class="nav-links">
+                <li><a href="#introduzione"><i class="fas fa-info-circle"></i> Introduzione</a></li>
+                <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a></li>
+            </ul>
+            <div class="mobile-menu-icon">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Manuale d'Uso - Gustify</h1>
+            <p>La guida completa per utilizzare al meglio Gustify e gestire i tuoi prodotti alimentari in modo intelligente</p>
+        </section>
+        
+        <!-- Table of Contents -->
+        <div class="toc manual-section">
+            <h3>Indice dei Contenuti</h3>
+            <ul>
+                <li><a href="#introduzione"><i class="fas fa-info-circle"></i> Introduzione</a></li>
+                <li><a href="#registrazione-e-accesso"><i class="fas fa-user-plus"></i> Registrazione e Accesso</a></li>
+                <li><a href="#dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#gestione-prodotti"><i class="fas fa-shopping-basket"></i> Gestione Prodotti</a></li>
+                <li><a href="#aggiunta-prodotti"><i class="fas fa-plus-circle"></i> Aggiunta Prodotti</a></li>
+                <li><a href="#monitoraggio-scadenze"><i class="fas fa-clock"></i> Monitoraggio Scadenze</a></li>
+                <li><a href="#profilo-utente"><i class="fas fa-user"></i> Profilo Utente</a></li>
+                <li><a href="#scansione-qr-code"><i class="fas fa-qrcode"></i> Scansione QR Code</a></li>
+                <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ e Risoluzione Problemi</a></li>
+            </ul>
+        </div>
+        
+        <!-- Introduction Section -->
+        <section id="introduzione" class="manual-section">
+            <h2><i class="fas fa-info-circle"></i> Introduzione</h2>
+            <p>Gustify è un'applicazione web che ti aiuta a monitorare i prodotti alimentari che hai in casa, tenendo traccia delle loro date di scadenza per ridurre gli sprechi alimentari. L'app ti permette di creare il tuo "frigo virtuale", aggiungere prodotti manualmente o tramite scansione QR code, e ricevere notifiche quando i prodotti sono prossimi alla scadenza.</p>
+            
+            <div class="info-card">
+                <p><strong>Benefici di Gustify:</strong></p>
+                <ul>
+                    <li>Risparmia denaro riducendo lo spreco alimentare</li>
+                    <li>Organizza meglio la tua dispensa e il tuo frigorifero</li>
+                    <li>Ricevi promemoria per i prodotti in scadenza</li>
+                    <li>Accedi facilmente all'inventario dei tuoi alimenti da qualsiasi dispositivo</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Registration and Login Section -->
+        <section id="registrazione-e-accesso" class="manual-section">
+            <h2><i class="fas fa-user-plus"></i> Registrazione e Accesso</h2>
+            
+            <h3>Registrazione</h3>
+            <ol>
+                <li>Dalla pagina iniziale, clicca su <strong>Registrati</strong></li>
+                <li>Completa il modulo di registrazione con:
+                    <ul>
+                        <li>Nome</li>
+                        <li>Cognome</li>
+                        <li>Email</li>
+                        <li>Password (deve contenere almeno 8 caratteri, una lettera maiuscola e un numero)</li>
+                    </ul>
+                </li>
+                <li>Clicca su <strong>Registrati</strong></li>
+                <li>Una volta registrato, sarai automaticamente reindirizzato alla dashboard</li>
+            </ol>
+            
+            <div class="info-card">
+                <p><strong>Nota:</strong> Scegli una password sicura che rispetti i requisiti indicati. L'applicazione verifica in tempo reale la conformità della password mentre la digiti.</p>
+            </div>
+            
+            <h3>Accesso</h3>
+            <ol>
+                <li>Dalla pagina iniziale, clicca su <strong>Accedi</strong></li>
+                <li>Inserisci la tua email e password</li>
+                <li>Clicca su <strong>Accedi</strong></li>
+            </ol>
+            
+            <h3>Logout</h3>
+            <ol>
+                <li>Dal menu di navigazione, clicca su <strong>Profilo</strong></li>
+                <li>Clicca sul pulsante <strong>Logout</strong> nella sidebar</li>
+            </ol>
+        </section>
+        
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="manual-section">
+            <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+            
+            <p>La dashboard è la tua pagina principale che mostra una panoramica del tuo frigo virtuale:</p>
+            
+            <h3>Elementi della Dashboard</h3>
+            <ul>
+                <li><strong>Benvenuto</strong>: Messaggio di benvenuto con il tuo nome</li>
+                <li><strong>Pulsanti Rapidi</strong>: 
+                    <ul>
+                        <li>"Scansiona QR Code" per aggiungere prodotti tramite scanner</li>
+                        <li>"Aggiungi manualmente" per inserire un nuovo prodotto</li>
+                    </ul>
+                </li>
+                <li><strong>Funzionalità</strong>: Panoramica delle funzionalità principali di Gustify</li>
+                <li><strong>Prodotti in Scadenza</strong>: Elenco dei prodotti che stanno per scadere, ordinati per data</li>
+            </ul>
+            
+            <div class="info-card">
+                <p><strong>Suggerimento:</strong> La dashboard è progettata per darti una visione rapida dei prodotti che richiedono attenzione. Controlla regolarmente questa sezione per evitare che i prodotti scadano senza essere utilizzati.</p>
+            </div>
+            
+            <h3>Navigazione</h3>
+            <ul>
+                <li>Utilizza il menu in alto per navigare tra Dashboard, Prodotti e Profilo</li>
+                <li>Su dispositivi mobili, il menu diventa un'icona "hamburger" che può essere toccata per visualizzare le opzioni</li>
+            </ul>
+        </section>
+        
+        <!-- Products Management Section -->
+        <section id="gestione-prodotti" class="manual-section">
+            <h2><i class="fas fa-shopping-basket"></i> Gestione Prodotti</h2>
+            
+            <p>La pagina "Prodotti" mostra tutti i prodotti nel tuo frigo virtuale.</p>
+            
+            <h3>Visualizzazione Prodotti</h3>
+            <ul>
+                <li>I prodotti sono visualizzati in una griglia (o in formato lista su dispositivi mobili)</li>
+                <li>Ogni prodotto mostra:
+                    <ul>
+                        <li>Nome/descrizione</li>
+                        <li>Categoria (con icona)</li>
+                        <li>Quantità</li>
+                        <li>Data di aggiunta</li>
+                        <li>Marca (se disponibile)</li>
+                        <li>Note (se disponibili)</li>
+                        <li>Data di scadenza (evidenziata in rosso se prossima alla scadenza)</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <h3>Filtri</h3>
+            <p>Puoi filtrare i prodotti usando le opzioni nella parte superiore:</p>
+            <ul>
+                <li><strong>Per categoria</strong>: Filtra per tipo di alimento (latticini, frutta, verdura, ecc.)</li>
+                <li><strong>Per scadenza</strong>: Visualizza i prodotti in base alla scadenza (prossima, entro una settimana, ecc.)</li>
+                <li><strong>Ricerca</strong>: Cerca un prodotto specifico per nome</li>
+            </ul>
+            
+            <h3>Azioni sui Prodotti</h3>
+            <p>Per ogni prodotto, hai tre opzioni:</p>
+            <ul>
+                <!--<li><strong>Consumato</strong> <i class="fas fa-utensils"></i>: Segna il prodotto come consumato (lo rimuove dal frigo)</li>-->
+                <li><strong>Modifica</strong> <i class="fas fa-edit"></i>: Modifica i dettagli del prodotto</li>
+                <li><strong>Elimina</strong> <i class="fas fa-trash"></i>: Rimuove il prodotto dal frigo</li>
+            </ul>
+            
+            <div class="warning-card">
+                <p><strong>Attenzione:</strong> L'eliminazione di un prodotto è permanente. <!--Se vuoi solo segnalare che hai consumato il prodotto, utilizza il pulsante "Consumato" invece.--></p>
+            </div>
+        </section>
+        
+        <!-- Adding Products Section -->
+        <section id="aggiunta-prodotti" class="manual-section">
+            <h2><i class="fas fa-plus-circle"></i> Aggiunta Prodotti</h2>
+            
+            <p>Ci sono due modi per aggiungere prodotti al tuo frigo virtuale:</p>
+            
+            <h3>Aggiunta Manuale</h3>
+            <ol>
+                <li>Dalla dashboard o dalla pagina prodotti, clicca su <strong>Aggiungi manualmente</strong></li>
+                <li>Compila il modulo con i dettagli del prodotto:
+                    <ul>
+                        <li>Nome o descrizione</li>
+                        <li>Categoria</li>
+                        <li>Marca</li>
+                        <li>Codice a barre (opzionale)</li>
+                        <li>Data di scadenza</li>
+                        <li>Quantità</li>
+                        <li>Note (opzionale)</li>
+                    </ul>
+                </li>
+                <li>Clicca su <strong>Salva Prodotto</strong></li>
+            </ol>
+            
+            <div class="info-card">
+                <p><strong>Suggerimento:</strong> La data di scadenza è preimpostata a una settimana da oggi per comodità, ma puoi modificarla in base alle tue esigenze.</p>
+            </div>
+            
+            <h3>Scansione QR Code</h3>
+            <ol>
+                <li>Dalla dashboard o dalla pagina prodotti, clicca su <strong>Scansiona QR Code</strong></li>
+                <li>Concedi i permessi di accesso alla fotocamera quando richiesto</li>
+                <li>Inquadra il codice QR con la fotocamera del dispositivo</li>
+                <li>I prodotti verranno automaticamente aggiunti al tuo frigo</li>
+            </ol>
+            
+            <div class="warning-card">
+                <p><strong>Nota:</strong> La scansione QR code è disponibile solo su dispositivi mobili o computer dotati di webcam.</p>
+            </div>
+        </section>
+        
+        <!-- Expiry Monitoring Section -->
+        <section id="monitoraggio-scadenze" class="manual-section">
+            <h2><i class="fas fa-clock"></i> Monitoraggio Scadenze</h2>
+            
+            <p>Gustify ti aiuta a tenere traccia delle scadenze dei tuoi prodotti:</p>
+            
+            <h3>Indicatori Visivi</h3>
+            <ul>
+                <li><span style="color: var(--text-dark);">Normale</span>: Prodotto lontano dalla scadenza</li>
+                <li><span style="color: var(--warning-color);">Giallo</span>: Prodotto in scadenza entro una settimana</li>
+                <li><span style="color: var(--error-color);">Rosso</span>: Prodotto in scadenza entro 3 giorni o già scaduto</li>
+            </ul>
+            
+            <h3>Notifiche</h3>
+            <p>Se hai abilitato le notifiche del browser:</p>
+            <ol>
+                <li>Riceverai avvisi per i prodotti che stanno per scadere</li>
+                <li>Le notifiche verranno inviate quando accedi all'applicazione</li>
+                <li>Puoi gestire le impostazioni delle notifiche dal tuo profilo</li>
+            </ol>
+            
+            <div class="info-card">
+                <p><strong>Importante:</strong> Per ricevere le notifiche, devi concedere i permessi di notifica al browser quando richiesto. Puoi modificare queste impostazioni in qualsiasi momento dalle impostazioni del browser.</p>
+            </div>
+        </section>
+        
+        <!-- User Profile Section -->
+        <section id="profilo-utente" class="manual-section">
+            <h2><i class="fas fa-user"></i> Profilo Utente</h2>
+            
+            <p>Nella pagina del profilo puoi gestire le tue informazioni personali e preferenze:</p>
+            
+            <h3>Informazioni Personali</h3>
+            <ul>
+                <li>Visualizza e modifica nome, cognome e email</li>
+                <li>Cambia la tua password</li>
+            </ul>
+            
+            <h3>Modifica del Profilo</h3>
+            <ol>
+                <li>Clicca sul pulsante <strong>Modifica Profilo</strong></li>
+                <li>Aggiorna i campi desiderati</li>
+                <li>Se vuoi cambiare la password, compila i campi della nuova password</li>
+                <li>Clicca su <strong>Salva modifiche</strong></li>
+            </ol>
+            
+            <h3>Statistiche</h3>
+            <p>La sidebar del profilo mostra statistiche sul tuo utilizzo:</p>
+            <ul>
+                <li>Numero totale di prodotti</li>
+                <li>Prodotti in scadenza</li>
+                <li>Prodotti scaduti</li>
+            </ul>
+            
+            <h3>Preferenze</h3>
+            <p>Puoi gestire varie impostazioni:</p>
+            <ul>
+                <li>Notifiche email</li>
+                <li>Avvisi prodotti in scadenza</li>
+                <li>Tema dell'interfaccia</li>
+            </ul>
+        </section>
+        
+        <!-- QR Code Scanning Section -->
+        <section id="scansione-qr-code" class="manual-section">
+            <h2><i class="fas fa-qrcode"></i> Scansione QR Code</h2>
+            
+            <p>La funzionalità di scansione QR code permette di aggiungere rapidamente prodotti al tuo frigo virtuale:</p>
+            
+            <h3>Formato QR Code Supportato</h3>
+            <p>Gustify supporta QR code in formato JSON con la seguente struttura:</p>
+            <pre>{
+    "userId": 1,
+    "products": [
+        {
+            "bar_code": "1234567890123",
+            "name": "Yogurt bianco",
+            "category": "dairy",
+            "quantita": 2,
+            "expiryDate": "2025-05-15",
+            "note": "Bianco intero"
+        },
+        ...
+    ]
+}</pre>
+            
+            <h3>Come Usare lo Scanner</h3>
+            <ol>
+                <li>Clicca su <strong>Scansiona QR Code</strong></li>
+                <li>Se hai più telecamere, seleziona quella da usare dal menu a tendina</li>
+                <li>Punta la telecamera verso il QR code finché non viene riconosciuto</li>
+                <li>Conferma l'aggiunta dei prodotti</li>
+            </ol>
+            
+            <div class="info-card">
+                <p><strong>Pro Tip:</strong> I QR code possono essere generati da scontrini di supermercati partner o creati manualmente per liste di prodotti ricorrenti che acquisti regolarmente.</p>
+            </div>
+        </section>
+        
+        <!-- FAQ Section -->
+        <section id="faq" class="manual-section">
+            <h2><i class="fas fa-question-circle"></i> FAQ e Risoluzione Problemi</h2>
+            
+            <h3>Domande Frequenti</h3>
+            
+            <div class="faq-item">
+                <p class="faq-question">D: Posso modificare le informazioni di un prodotto dopo averlo aggiunto?</p>
+                <p class="faq-answer">R: Sì, puoi modificare qualsiasi prodotto cliccando sull'icona della matita nella scheda del prodotto.</p>
+            </div>
+            
+            <div class="faq-item">
+                <p class="faq-question">D: Come elimino un prodotto dal mio frigo?</p>
+                <p class="faq-answer">R: Clicca sull'icona del cestino nella scheda del prodotto e conferma l'eliminazione.</p>
+            </div>
+            
+            <div class="faq-item">
+                <p class="faq-question">D: Cosa succede quando un prodotto scade?</p>
+                <p class="faq-answer">R: I prodotti scaduti vengono evidenziati in rosso e riceverai notifiche, ma rimarranno nel tuo frigo finché non li elimini <!--o li segni come consumati.--></p>
+            </div>
+            
+            <div class="faq-item">
+                <p class="faq-question">D: Posso personalizzare un prodotto standard?</p>
+                <p class="faq-answer">R: Sì, quando modifichi un prodotto puoi personalizzare i dettagli come nome, marca e categoria.</p>
+            </div>
+            
+            <h3>Risoluzione Problemi</h3>
+            
+            <div class="faq-item">
+                <p class="faq-question">Problema: Non riesco ad accedere al mio account</p>
+                <p class="faq-answer">Soluzione:</p>
+                <ul>
+                    <li>Verifica di aver inserito l'email corretta</li>
+                    <li>Assicurati che la password sia corretta</li>
+                    <li>Se hai dimenticato la password, contatta l'amministratore di sistema</li>
+                </ul>
+            </div>
+            
+            <div class="faq-item">
+                <p class="faq-question">Problema: La scansione QR code non funziona</p>
+                <p class="faq-answer">Soluzione:</p>
+                <ul>
+                    <li>Verifica di aver concesso i permessi di accesso alla fotocamera</li>
+                    <li>Assicurati che il QR code sia ben illuminato e non danneggiato</li>
+                    <li>Prova ad aggiungere il prodotto manualmente</li>
+                </ul>
+            </div>
+            
+            <div class="faq-item">
+                <p class="faq-question">Problema: Non ricevo notifiche per i prodotti in scadenza</p>
+                <p class="faq-answer">Soluzione:</p>
+                <ul>
+                    <li>Verifica di aver abilitato le notifiche nelle impostazioni del browser</li>
+                    <li>Controlla le impostazioni di notifica nel tuo profilo</li>
+                    <li>Su alcuni dispositivi mobili, potrebbe essere necessario consentire le notifiche nelle impostazioni del sistema</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
+    </footer>
+
+    <script>
+        // Menu mobile toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuIcon = document.querySelector('.mobile-menu-icon');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (mobileMenuIcon && navLinks) {
+                mobileMenuIcon.addEventListener('click', function() {
+                    navLinks.classList.toggle('show');
+                });
+            }
+            
+            // Scroll smooth per link interni
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    // Nascondi il menu mobile dopo il click (se visibile)
+                    if (navLinks.classList.contains('show')) {
+                        navLinks.classList.remove('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

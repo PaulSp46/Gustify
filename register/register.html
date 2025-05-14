@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gustify - Registrazione</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="register.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="navigateTo('../index.php')" tabindex="0" role="button" aria-label="Vai alla home">
+                <i class="fas fa-leaf"></i>
+                Gustify
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="login-form fade-in">
+            <div class="form-header">
+                <h1>Benvenuto</h1>
+                <p>Crea il tuo account Gustify</p>
+            </div>
+            
+            <form id="register-form" method="POST" action="register.php">
+                <div class="form-group">
+                    <label for="name">Nome</label>
+                    <div class="input-group">
+                        <input name="name" type="text" id="name" placeholder="Inserisci il tuo nome" required autocomplete="given-name">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="surname">Cognome</label>
+                    <div class="input-group">
+                        <input name="surname" type="text" id="surname" placeholder="Inserisci il tuo cognome" required autocomplete="family-name">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-group">
+                        <input name="email" type="email" id="email" placeholder="Inserisci la tua email" required autocomplete="email">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <input name="password" type="password" id="password" placeholder="Crea una password sicura" required autocomplete="new-password">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    
+                    <div class="password-requirements">
+                        <div class="requirement" id="req-length">
+                            <i class="fas fa-circle"></i>
+                            <span>Almeno 8 caratteri</span>
+                        </div>
+                        <div class="requirement" id="req-uppercase">
+                            <i class="fas fa-circle"></i>
+                            <span>Almeno una lettera maiuscola</span>
+                        </div>
+                        <div class="requirement" id="req-number">
+                            <i class="fas fa-circle"></i>
+                            <span>Almeno un numero</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">Registrati</button>
+                
+                <div class="signup-link">
+                    Hai già un account? <a href="../login/login.html">Accedi</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast di errore -->
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">Errore di registrazione</div>
+            <div class="toast-message">Si è verificato un errore. Riprova.</div>
+        </div>
+        <div class="toast-close" onclick="closeToast()">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>
+    </footer>
+    
+    <script>
+        // Navigazione
+        function navigateTo(link) {
+            window.location.replace(link);
+        }
+        
+        // Verifica requisiti password in tempo reale
+        const passwordInput = document.getElementById('password');
+        
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                
+                // Controlla lunghezza
+                const reqLength = document.getElementById('req-length');
+                if (password.length >= 8) {
+                    reqLength.classList.add('valid');
+                    reqLength.querySelector('i').className = 'fas fa-check-circle';
+                } else {
+                    reqLength.classList.remove('valid');
+                    reqLength.querySelector('i').className = 'fas fa-circle';
+                }
+                
+                // Controlla lettera maiuscola
+                const reqUppercase = document.getElementById('req-uppercase');
+                if (/[A-Z]/.test(password)) {
+                    reqUppercase.classList.add('valid');
+                    reqUppercase.querySelector('i').className = 'fas fa-check-circle';
+                } else {
+                    reqUppercase.classList.remove('valid');
+                    reqUppercase.querySelector('i').className = 'fas fa-circle';
+                }
+                
+                // Controlla numero
+                const reqNumber = document.getElementById('req-number');
+                if (/[0-9]/.test(password)) {
+                    reqNumber.classList.add('valid');
+                    reqNumber.querySelector('i').className = 'fas fa-check-circle';
+                } else {
+                    reqNumber.classList.remove('valid');
+                    reqNumber.querySelector('i').className = 'fas fa-circle';
+                }
+            });
+        }
+        
+        // Gestione del toast
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            const toastTitle = toast.querySelector('.toast-title');
+            const toastMessage = toast.querySelector('.toast-message');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            toast.classList.add('show');
+            
+            // Nascondi il toast dopo 5 secondi
+            setTimeout(closeToast, 5000);
+        }
+        
+        function closeToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('show');
+        }
+        
+        // Validazione del form
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            let isValid = true;
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const nameInput = document.getElementById('name');
+            const surnameInput = document.getElementById('surname');
+            
+            // Verifica campi vuoti
+            if (nameInput.value.trim() === '') {
+                isValid = false;
+                nameInput.style.borderColor = 'var(--error-color)';
+            } else {
+                nameInput.style.borderColor = 'var(--border-color)';
+            }
+            
+            if (surnameInput.value.trim() === '') {
+                isValid = false;
+                surnameInput.style.borderColor = 'var(--error-color)';
+            } else {
+                surnameInput.style.borderColor = 'var(--border-color)';
+            }
+            //TODO
+            // Verifica formato email
+            //const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            //if (!emailRegex.test(emailInput.value)) {
+            //    isValid = false;
+            //    emailInput.style.borderColor = 'var(--error-color)';
+            //} else {
+            //    emailInput.style.borderColor = 'var(--border-color)';
+            //}
+            
+            // Verifica password
+            if (passwordInput.value.length < 8 || 
+                !/[A-Z]/.test(passwordInput.value) || 
+                !/[0-9]/.test(passwordInput.value)) {
+                isValid = false;
+                passwordInput.style.borderColor = 'var(--error-color)';
+            } else {
+                passwordInput.style.borderColor = 'var(--border-color)';
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                showToast('Errore di validazione', 'Verifica che tutti i campi siano compilati correttamente.');
+            }
+        });
+        
+        // Verifica parametri URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                const errorMessage = urlParams.get('error');
+                let message = 'Si è verificato un errore durante la registrazione.';
+                
+                switch (errorMessage) {
+                    case 'email_exists':
+                        message = 'Questa email è già in uso. Prova con un\'altra email.';
+                        break;
+                    case 'invalid_email':
+                        message = 'L\'email inserita non è valida. Riprova.';
+                        break;
+                    case 'weak_password':
+                        message = 'La password non rispetta i requisiti di sicurezza.';
+                        break;
+                }
+                
+                showToast('Errore di registrazione', message);
+            }
+        });
+    </script>
+</body>
+</html>

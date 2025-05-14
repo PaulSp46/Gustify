@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     let productToDelete = null;
+    
+    // Variabile globale per il prodotto da consumare
+    window.productToConsume = null;
+    window.productTotalQuantity = null;
 
     // ——— NOTIFICHE SCADENZE ———
 
@@ -67,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Funzione per mostrare/nascondere il menu delle azioni sui prodotti
     window.showProductActions = function(productId) {
+        console.log("showProductActions chiamato per ID:", productId);
         window.currentProductId = productId;
         
         const icon = event.target;
@@ -94,8 +99,80 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Funzioni per le azioni sui prodotti
     window.consumeProduct = function(productId) {
+        console.log("Consumazione prodotto ID:", productId);
+        
         if (actionsPopup) {
             actionsPopup.style.display = 'none';
+        }
+        
+        // Find the product card
+        let productCard = null;
+        const productCards = document.querySelectorAll('.product-card');
+        
+        console.log("Numero di card prodotto trovate:", productCards.length);
+        
+        for (let card of productCards) {
+            const consumeBtn = card.querySelector('.consume-btn');
+            if (consumeBtn) {
+                // Estrarre l'ID del prodotto dall'attributo onclick
+                const onclickAttr = consumeBtn.getAttribute('onclick');
+                console.log("Attributo onclick:", onclickAttr);
+                
+                if (onclickAttr) {
+                    // Cercare un pattern come "consumeProduct(52)"
+                    const match = onclickAttr.match(/consumeProduct\((\d+)/);
+                    if (match && match[1] == productId) {
+                        productCard = card;
+                        console.log("Card trovata per il prodotto ID:", productId);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (!productCard) {
+            showToast('Errore', 'Prodotto non trovato.', 'error');
+            console.error("Card prodotto non trovata per ID:", productId);
+            return;
+        }
+        
+        // Get the total quantity
+        const quantityText = productCard.querySelector('.product-quantity').textContent;
+        const totalQuantity = parseInt(quantityText.match(/\d+/)[0]) || 1;
+        
+        console.log("Quantità totale:", totalQuantity);
+        
+        // Show the consumption modal
+        const consumeModal = document.getElementById('consume-modal');
+        const quantityInput = document.getElementById('consume-quantity');
+        const productNameElement = document.getElementById('consume-product-name');
+        
+        // Update modal content
+        productNameElement.textContent = productCard.querySelector('.product-title').textContent;
+        quantityInput.value = "1";
+        quantityInput.max = totalQuantity;
+        
+        // Store the product ID for the confirmation
+        window.productToConsume = productId;
+        window.productTotalQuantity = totalQuantity;
+        
+        // Show the modal
+        consumeModal.classList.add('show');
+    };
+
+    window.confirmConsumption = function() {
+        console.log("Conferma consumazione - ID prodotto:", window.productToConsume);
+        
+        const consumeModal = document.getElementById('consume-modal');
+        const quantityInput = document.getElementById('consume-quantity');
+        const consumeQuantity = parseInt(quantityInput.value);
+        
+        console.log("Quantità da consumare:", consumeQuantity);
+        console.log("Quantità totale disponibile:", window.productTotalQuantity);
+        
+        if (isNaN(consumeQuantity) || consumeQuantity <= 0) {
+            showToast('Errore', 'Quantità non valida.', 'error');
+            return;
         }
         
         // AJAX request to consume the product
@@ -103,41 +180,175 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.open('POST', '../CRUDfun/consumeProduct.php', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
+            console.log("Risposta ricevuta dal server:", this.status);
+            console.log("Risposta completa:", this.responseText);
+            
             if (this.status === 200) {
                 try {
                     const response = JSON.parse(this.responseText);
+                    console.log("Risposta parsata:", response);
+                    
                     if (response.success) {
                         showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
                         
-                        // Rimuovi l'elemento dalla lista
-                        const productElements = document.querySelectorAll('.product-card');
-                        for (let product of productElements) {
-                            if (product.querySelector('.consume-btn').getAttribute('onclick').includes(productId)) {
-                                product.style.opacity = '0';
-                                setTimeout(() => {
-                                    product.remove();
-                                    // Check if the grid is empty
-                                    if (document.querySelectorAll('.product-card').length === 0) {
-                                        location.reload(); // Reload to show the empty state
+                        // Utilizzare l'ID salvato nella variabile globale
+                        const prodId = window.productToConsume;
+                        console.log("Cercando prodotto ID:", prodId, "per aggiornare l'UI");
+                        
+                        const productCards = document.querySelectorAll('.product-card');
+                        let cardFound = false;
+                        
+                        for (let card of productCards) {
+                            const consumeBtn = card.querySelector('.consume-btn');
+                            if (consumeBtn) {
+                                const onclickAttr = consumeBtn.getAttribute('onclick');
+                                const match = onclickAttr.match(/consumeProduct\((\d+)/);
+                                
+                                if (match && match[1] == prodId) {
+                                    console.log("Card trovata per aggiornamento UI");
+                                    cardFound = true;
+                                    
+                                    if (response.consumed_all) {
+                                        console.log("Rimozione completa della card con animazione");
+                                        
+                                        // Salviamo l'altezza attuale per un'animazione fluida
+                                        card.style.height = card.offsetHeight + 'px';
+                                        card.style.overflow = 'hidden';
+                                        card.style.transition = 'all 0.5s ease-out';
+                                        
+                                        // Fase 1: fade out e slide
+                                        card.style.opacity = '0';
+                                        card.style.transform = 'translateX(-30px)';
+                                        
+                                        // Fase 2: collasso dell'altezza
+                                        setTimeout(() => {
+                                            card.style.height = '0';
+                                            card.style.margin = '0';
+                                            card.style.padding = '0';
+                                            
+                                            // Fase 3: rimozione effettiva
+                                            setTimeout(() => {
+                                                card.remove();
+                                                
+                                                // Controlla se rimangono prodotti
+                                                if (document.querySelectorAll('.product-card').length === 0) {
+                                                    console.log("Nessun prodotto rimasto, mostrando stato vuoto");
+                                                    
+                                                    // Animazione stato vuoto
+                                                    const emptyState = document.createElement('div');
+                                                    emptyState.className = 'empty-fridge';
+                                                    emptyState.style.opacity = '0';
+                                                    emptyState.style.transform = 'translateY(20px)';
+                                                    emptyState.style.transition = 'all 0.5s ease';
+                                                    emptyState.innerHTML = `
+                                                        <i class="fas fa-box-open"></i>
+                                                        <h3>Il tuo frigo è vuoto!</h3>
+                                                        <p>Aggiungi i tuoi prodotti alimentari per iniziare a monitorare le scadenze e ottimizzare i consumi.</p>
+                                                        <button class="manual-btn" onclick="location.href='../manualAdd/manualAdd.php'">
+                                                            <i class="fas fa-plus"></i>
+                                                            Aggiungi prodotti
+                                                        </button>
+                                                    `;
+                                                    
+                                                    const grid = document.getElementById('product-grid');
+                                                    if (grid) {
+                                                        grid.innerHTML = '';
+                                                        grid.appendChild(emptyState);
+                                                        
+                                                        // Animazione di comparsa
+                                                        setTimeout(() => {
+                                                            emptyState.style.opacity = '1';
+                                                            emptyState.style.transform = 'translateY(0)';
+                                                        }, 10);
+                                                    }
+                                                }
+                                            }, 300);
+                                        }, 300);
+                                    } else {
+                                        console.log("Aggiornamento quantità parziale con animazione");
+                                        console.log("Quantità rimanente:", response.remaining_quantity);
+                                        
+                                        // Aggiornamento della quantità parziale
+                                        const quantityElement = card.querySelector('.product-quantity');
+                                        console.log("Elemento quantità trovato:", quantityElement);
+                                        
+                                        if (quantityElement && response.remaining_quantity) {
+                                            // Evidenzia l'intera card
+                                            card.style.transition = 'background-color 0.5s ease';
+                                            const originalBg = card.style.backgroundColor;
+                                            card.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                                            
+                                            // Aggiorna il testo della quantità con animazione
+                                            quantityElement.style.transition = 'all 0.3s ease';
+                                            quantityElement.style.transform = 'scale(1.1)';
+                                            quantityElement.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+                                            
+                                            // Aggiorna il testo
+                                            quantityElement.textContent = 'Confezioni: ' + response.remaining_quantity;
+                                            console.log("Testo quantità aggiornato a:", quantityElement.textContent);
+                                            
+                                            // Ripristina lo stato normale dopo l'animazione
+                                            setTimeout(() => {
+                                                quantityElement.style.transform = 'scale(1)';
+                                                quantityElement.style.backgroundColor = 'transparent';
+                                                card.style.backgroundColor = originalBg;
+                                            }, 1000);
+                                        } else {
+                                            console.log("Elemento quantità non trovato o quantità rimanente non disponibile");
+                                            setTimeout(function() {
+                                                location.reload();
+                                            }, 1000);
+                                        }
                                     }
-                                }, 300);
-                                break;
+                                    break;
+                                }
                             }
                         }
+                        
+                        // Se non abbiamo trovato la card, ricarichiamo la pagina come ultima risorsa
+                        if (!cardFound) {
+                            console.log("Card non trovata dopo la consumazione, ricarico la pagina");
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        }
                     } else {
+                        console.log("Errore restitutito dal server:", response.message);
                         showToast('Errore', response.message || 'Si è verificato un errore durante il consumo del prodotto.', 'error');
                     }
                 } catch (e) {
+                    console.error("Errore parsing JSON:", e);
+                    console.error("Risposta server:", this.responseText);
                     showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.', 'error');
                 }
             } else {
+                console.error("Errore HTTP:", this.status);
                 showToast('Errore', 'Si è verificato un errore durante il consumo del prodotto.', 'error');
             }
         };
         xhr.onerror = function() {
+            console.error("Errore di rete nella richiesta");
             showToast('Errore', 'Si è verificato un errore di rete durante il consumo del prodotto.', 'error');
         };
-        xhr.send('relation_id=' + productId);
+        
+        const payload = 'relation_id=' + window.productToConsume + '&consume_quantity=' + consumeQuantity;
+        console.log("Invio payload:", payload);
+        xhr.send(payload);
+        
+        // Hide the modal
+        consumeModal.classList.remove('show');
+        // Non resettare subito le variabili per evitare problemi con risposte asincrone
+        setTimeout(() => {
+            window.productToConsume = null;
+            window.productTotalQuantity = null;
+        }, 2000);
+    };
+
+    window.cancelConsumption = function() {
+        const consumeModal = document.getElementById('consume-modal');
+        consumeModal.classList.remove('show');
+        window.productToConsume = null;
+        window.productTotalQuantity = null;
     };
     
     window.editProduct = function(productId) {
@@ -180,16 +391,63 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (this.status === 200) {
                         const response = JSON.parse(this.responseText);
                         if (response.success) {
-                            location.reload();
+                            // Proviamo a trovare e rimuovere la card prima di ricaricare
+                            const cards = document.querySelectorAll('.product-card');
+                            let found = false;
+                            
+                            for (let card of cards) {
+                                const deleteBtn = card.querySelector('.delete-btn');
+                                if (deleteBtn) {
+                                    const onclickAttr = deleteBtn.getAttribute('onclick');
+                                    const match = onclickAttr.match(/deleteProduct\((\d+)/);
+                                    
+                                    if (match && match[1] == productToDelete) {
+                                        found = true;
+                                        
+                                        // Animazione di rimozione
+                                        card.style.height = card.offsetHeight + 'px';
+                                        card.style.overflow = 'hidden';
+                                        card.style.transition = 'all 0.5s ease-out';
+                                        
+                                        // Prima fase: fade out e slide
+                                        card.style.opacity = '0';
+                                        card.style.transform = 'translateX(-30px)';
+                                        
+                                        // Seconda fase: collasso dell'altezza
+                                        setTimeout(() => {
+                                            card.style.height = '0';
+                                            card.style.margin = '0';
+                                            card.style.padding = '0';
+                                            
+                                            // Ultima fase: rimozione dal DOM
+                                            setTimeout(() => {
+                                                card.remove();
+                                                
+                                                // Verifichiamo se abbiamo prodotti rimasti
+                                                if (document.querySelectorAll('.product-card').length === 0) {
+                                                    location.reload(); // Ricarica per mostrare lo stato vuoto
+                                                }
+                                                
+                                                showToast('Successo', 'Prodotto eliminato con successo.');
+                                            }, 300);
+                                        }, 300);
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (!found) {
+                                location.reload();
+                            }
                         } else {
-                            showToast('Errore', response.message || 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                            showToast('Errore', response.message || 'Si è verificato un errore durante l\'eliminazione del prodotto.', 'error');
                         }
                     } else {
-                        showToast('Errore', 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                        showToast('Errore', 'Si è verificato un errore durante l\'eliminazione del prodotto.', 'error');
                     }
                 };
                 xhr.onerror = function() {
-                    showToast('Errore', 'Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
+                    showToast('Errore', 'Si è verificato un errore di rete durante l\'eliminazione del prodotto.', 'error');
                 };
                 xhr.send('relation_id=' + productToDelete);
                 
@@ -366,20 +624,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const toastMessage = toast.querySelector('.toast-message');
         const toastIcon = toast.querySelector('.toast-icon i');
         
-        toast.className = 'toast ' + type;
+        // Reset delle animazioni
+        toast.style.animation = 'none';
+        void toast.offsetWidth; // Forza reflow
+        
         toastTitle.textContent = title;
         toastMessage.textContent = message;
         
         if (type === 'success') {
             toastIcon.className = 'fas fa-check-circle';
+            toast.style.borderLeftColor = 'var(--success-color)';
+            toastIcon.style.color = 'var(--success-color)';
         } else {
             toastIcon.className = 'fas fa-exclamation-circle';
+            toast.style.borderLeftColor = 'var(--error-color)';
+            toastIcon.style.color = 'var(--error-color)';
         }
         
         toast.classList.add('show');
+        toast.style.animation = 'toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         
-        // Hide toast after 5 seconds
-        setTimeout(() => toast.classList.remove('show'), 5000);
+        // Hide toast after 5 seconds with animation
+        setTimeout(() => {
+            toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 300);
+        }, 5000);
     }
 
     // Function to check if the list is empty
@@ -389,7 +660,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const emptyMessage = document.createElement('li');
             emptyMessage.className = 'empty-message';
             emptyMessage.textContent = 'Nessun prodotto nel tuo frigo.';
+            emptyMessage.style.opacity = '0';
             productList.appendChild(emptyMessage);
+            
+            // Animazione di comparsa
+            setTimeout(() => {
+                emptyMessage.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                emptyMessage.style.opacity = '1';
+                emptyMessage.style.transform = 'translateY(0)';
+            }, 10);
         }
     }
 
@@ -421,9 +700,59 @@ document.addEventListener('DOMContentLoaded', function() {
     window.closeToast = function() {
         const toast = document.getElementById('toast');
         if (toast) {
-            toast.classList.remove('show');
+            toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 300);
         }
     };
+    
+    // Aggiungiamo stili per le animazioni
+    if (!document.getElementById('animation-styles')) {
+        const style = document.createElement('style');
+        style.id = 'animation-styles';
+        style.textContent = `
+            @keyframes toastSlideIn {
+                0% { transform: translateX(150%); opacity: 0; }
+                100% { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes toastSlideOut {
+                0% { transform: translateX(0); opacity: 1; }
+                100% { transform: translateX(150%); opacity: 0; }
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes pulseScale {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+            
+            @keyframes slideOut {
+                0% { transform: translateX(0); opacity: 1; }
+                100% { transform: translateX(-30px); opacity: 0; }
+            }
+            
+            .product-card, .product-item {
+                transition: all 0.5s ease-out;
+            }
+            
+            .empty-message {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            
+            .product-quantity {
+                transition: all 0.3s ease;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -459,7 +788,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 let showBySearch = searchValue === '' || productName.includes(searchValue);
                 
                 // Mostra o nascondi la card
-                card.style.display = (showByCategory && showByExpiry && showBySearch) ? 'block' : 'none';
+                if (showByCategory && showByExpiry && showBySearch) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.3s ease';
+                } else {
+                    card.style.display = 'none';
+                }
             });
         }
         
@@ -475,14 +809,33 @@ function toggleNote(element) {
     const fullNote = noteContainer.querySelector('.note-full');
     
     if (fullNote.style.display === 'none') {
-        // Espandi la nota
+        // Espandi la nota con animazione
         truncatedNote.style.display = 'none';
+        fullNote.style.opacity = '0';
         fullNote.style.display = 'inline';
+        fullNote.style.transition = 'opacity 0.3s ease';
+        
+        // Forza il reflow
+        void fullNote.offsetWidth;
+        
+        // Avvia l'animazione di fade in
+        fullNote.style.opacity = '1';
         element.textContent = 'Mostra meno';
     } else {
-        // Contrai la nota
-        truncatedNote.style.display = 'inline';
-        fullNote.style.display = 'none';
-        element.textContent = 'Leggi tutto';
+        // Contrai la nota con animazione
+        fullNote.style.opacity = '0';
+        
+        setTimeout(() => {
+            fullNote.style.display = 'none';
+            truncatedNote.style.display = 'inline';
+            
+            // Anima la ricomparsa del testo troncato
+            truncatedNote.style.opacity = '0';
+            truncatedNote.style.transition = 'opacity 0.3s ease';
+            void truncatedNote.offsetWidth;
+            truncatedNote.style.opacity = '1';
+            
+            element.textContent = 'Leggi tutto';
+        }, 300);
     }
 }

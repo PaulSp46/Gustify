@@ -280,6 +280,30 @@
         <div id="qr-reader__camera"></div>
         <select id="qr-reader__camera-selection"></select>
     </div>
+
+    <!-- Consume Modal -->
+    <div class="modal-overlay" id="consume-modal">
+        <div class="modal-container">
+            <div class="modal-icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <div class="modal-title">Consumo prodotto</div>
+            <div class="modal-message">
+                Stai per consumare <span id="consume-product-name">questo prodotto</span>. Quante confezioni vuoi consumare?
+            </div>
+            <div style="margin: 1rem 0; text-align: center;">
+                <input type="number" id="consume-quantity" min="1" value="1" style="padding: 0.5rem; border-radius: var(--rounded-md); border: 1px solid var(--border-color); width: 100px; text-align: center;">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" onclick="cancelConsumption()">
+                    <i class="fas fa-times"></i> Annulla
+                </button>
+                <button class="modal-btn modal-btn-primary" onclick="confirmConsumption()">
+                    <i class="fas fa-check"></i> Conferma
+                </button>
+            </div>
+        </div>
+    </div>
     
     <!-- Success Message Modal -->
     <div class="success-message" id="success-message">

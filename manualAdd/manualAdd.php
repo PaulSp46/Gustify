@@ -229,7 +229,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="quantita">Quantità *</label>
+                    <label for="quantita">Numero di confezioni *</label>
                     <input type="number" id="quantita" name="quantita" min="1" value="1" class="form-control" required>
                 </div>
                 

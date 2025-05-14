@@ -1,13 +1,12 @@
 // Sostituisci completamente il contenuto del file dashboard.js con questo
 
-// Definisci tutte le funzioni globali FUORI dal DOMContentLoaded
-// Così saranno disponibili immediatamente per gli attributi onclick
-
 // Variabile globale per l'ID del prodotto corrente
 window.currentProductId = null;
+window.productToConsume = null;
 
 // Funzione per il menu contestuale
 window.showProductActions = function(productId, e) {
+    console.log("showProductActions chiamato per productId:", productId);
     // Cattura l'evento
     var event = e || window.event;
     
@@ -43,9 +42,78 @@ window.showProductActions = function(productId, e) {
 
 // Altre funzioni globali necessarie
 window.consumeProduct = function(productId) {
+    console.log("---- INIZIO PROCESSO CONSUMAZIONE ----");
+    console.log("Consumazione prodotto ID:", productId);
+    
     var actionsPopup = document.getElementById('product-actions-popup');
     if (actionsPopup) {
         actionsPopup.style.display = 'none';
+    }
+    
+    // Find the product list item
+    let productItem = null;
+    const productItems = document.querySelectorAll('.product-item');
+    
+    console.log("Numero elementi prodotto trovati:", productItems.length);
+    
+    for (let item of productItems) {
+        const actionElement = item.querySelector('.product-actions');
+        if (actionElement) {
+            // Estrarre l'ID del prodotto dall'attributo onclick
+            const onclickAttr = actionElement.getAttribute('onclick');
+            console.log("Attributo onclick:", onclickAttr);
+            
+            if (onclickAttr) {
+                // Cercare un pattern come "showProductActions(52, event)"
+                const match = onclickAttr.match(/showProductActions\((\d+)/);
+                if (match && match[1] == productId) {
+                    productItem = item;
+                    console.log("Elemento prodotto trovato per ID:", productId);
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (!productItem) {
+        showToast('Errore', 'Prodotto non trovato.', 'error');
+        console.error("Elemento prodotto non trovato per ID:", productId);
+        return;
+    }
+    
+    // Get the product name for display in the modal
+    const productName = productItem.querySelector('.product-name').textContent;
+    console.log("Nome prodotto:", productName);
+    
+    // Show the consumption modal
+    const consumeModal = document.getElementById('consume-modal');
+    const quantityInput = document.getElementById('consume-quantity');
+    const productNameElement = document.getElementById('consume-product-name');
+    
+    // Update modal content
+    productNameElement.textContent = productName;
+    quantityInput.value = "1";
+    
+    // Store the product ID for the confirmation
+    window.productToConsume = productId;
+    
+    // Show the modal
+    consumeModal.classList.add('show');
+};
+
+window.confirmConsumption = function() {
+    console.log("confirmConsumption chiamato - ID prodotto:", window.productToConsume);
+    
+    const consumeModal = document.getElementById('consume-modal');
+    const quantityInput = document.getElementById('consume-quantity');
+    const consumeQuantity = parseInt(quantityInput.value);
+    
+    console.log("Quantità da consumare:", consumeQuantity);
+    
+    if (isNaN(consumeQuantity) || consumeQuantity <= 0) {
+        showToast('Errore', 'Quantità non valida.', 'error');
+        console.error("Errore: quantità non valida");
+        return;
     }
     
     // AJAX request to consume the product
@@ -53,42 +121,159 @@ window.consumeProduct = function(productId) {
     xhr.open('POST', '../CRUDfun/consumeProduct.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function() {
+        console.log("Risposta ricevuta dal server - Status:", this.status);
+        console.log("Risposta completa:", this.responseText);
+        
         if (this.status === 200) {
             try {
                 var response = JSON.parse(this.responseText);
+                console.log("Risposta parsata:", response);
+                console.log("Success flag:", response.success);
+                console.log("Consumed all flag:", response.consumed_all);
+                
                 if (response.success) {
                     showToast('Prodotto consumato', 'Il prodotto è stato contrassegnato come consumato.');
                     
-                    // Trova e rimuovi il prodotto dalla lista
+                    // Cerchiamo il prodotto nella UI
+                    var productId = window.productToConsume;
                     var productElements = document.querySelectorAll('.product-item');
+                    console.log("Cerco prodotto ID:", productId, "tra", productElements.length, "elementi");
+                    
+                    var trovato = false;
                     for (var i = 0; i < productElements.length; i++) {
                         var product = productElements[i];
                         var actionElement = product.querySelector('.product-actions');
-                        if (actionElement && actionElement.getAttribute('onclick').indexOf(productId) > -1) {
-                            product.style.opacity = '0';
-                            setTimeout(function(elem) {
-                                return function() {
-                                    elem.remove();
-                                    checkEmptyList();
-                                };
-                            }(product), 300);
-                            break;
+                        
+                        if (actionElement) {
+                            const onclickAttr = actionElement.getAttribute('onclick');
+                            const match = onclickAttr.match(/showProductActions\((\d+)/);
+                            console.log("Controllo elemento", i, "- onclick:", onclickAttr);
+                            
+                            if (match && match[1] == productId) {
+                                console.log("Prodotto trovato in posizione", i);
+                                trovato = true;
+                                
+                                if (response.consumed_all) {
+                                    console.log("Rimuovo completamente il prodotto con animazione");
+                                    
+                                    // Prepariamo l'elemento per l'animazione
+                                    product.style.transition = "all 0.5s ease-out";
+                                    product.style.height = product.offsetHeight + "px";
+                                    product.style.overflow = "hidden";
+                                    
+                                    // Prima fase dell'animazione - fade out e slide
+                                    product.style.opacity = "0";
+                                    product.style.transform = "translateX(-30px)";
+                                    
+                                    // Seconda fase dell'animazione - riduzione altezza
+                                    setTimeout(function() {
+                                        product.style.height = "0";
+                                        product.style.marginTop = "0";
+                                        product.style.marginBottom = "0";
+                                        product.style.paddingTop = "0";
+                                        product.style.paddingBottom = "0";
+                                        
+                                        // Rimozione finale dell'elemento
+                                        setTimeout(function() {
+                                            product.remove();
+                                            console.log("Elemento rimosso dal DOM");
+                                            checkEmptyList();
+                                        }, 300);
+                                    }, 300);
+                                } else {
+                                    console.log("Aggiorno la quantità parziale");
+                                    console.log("Quantità rimanente:", response.remaining_quantity);
+                                    
+                                    // Trova l'elemento info dentro product-info
+                                    var productInfo = product.querySelector('.product-info');
+                                    var infoDiv = productInfo ? productInfo.querySelector('div:nth-child(2)') : null;
+                                    
+                                    if (infoDiv) {
+                                        console.log("Elemento info trovato");
+                                        
+                                        // Cerca un elemento quantità esistente o creane uno nuovo
+                                        var quantityElem = infoDiv.querySelector('.product-quantity');
+                                        if (!quantityElem) {
+                                            console.log("Creo nuovo elemento quantità");
+                                            quantityElem = document.createElement('div');
+                                            quantityElem.className = 'product-quantity';
+                                            infoDiv.appendChild(quantityElem);
+                                        }
+                                        
+                                        // Aggiorna il testo della quantità
+                                        quantityElem.textContent = 'Quantità: ' + response.remaining_quantity;
+                                        console.log("Testo quantità aggiornato:", quantityElem.textContent);
+                                        
+                                        // Evidenzia l'aggiornamento con un effetto visivo pulsante
+                                        quantityElem.style.animation = "pulseHighlight 1s ease";
+                                        
+                                        // Evidenzia anche l'intero prodotto
+                                        product.style.transition = "background-color 0.5s ease";
+                                        const originalColor = product.style.backgroundColor;
+                                        product.style.backgroundColor = "rgba(76, 175, 80, 0.1)";
+                                        
+                                        setTimeout(function() {
+                                            product.style.backgroundColor = originalColor;
+                                            // Rimuovi l'animazione per consentire di ripeterla in futuro
+                                            quantityElem.style.animation = "none";
+                                        }, 1000);
+                                    } else {
+                                        console.error("Elemento info non trovato");
+                                        // Se non riusciamo a trovare l'elemento, ricarichiamo la pagina
+                                        setTimeout(function() {
+                                            location.reload();
+                                        }, 1000);
+                                    }
+                                }
+                                break;
+                            }
                         }
                     }
+                    
+                    if (!trovato) {
+                        console.error("ERRORE: Prodotto non trovato nella UI dopo la risposta!");
+                        // Se non troviamo il prodotto, ricarichiamo la pagina
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    }
                 } else {
+                    console.error("Errore restituito dal server:", response.message);
                     showToast('Errore', response.message || 'Si è verificato un errore durante il consumo del prodotto.', 'error');
                 }
             } catch (e) {
+                console.error("ERRORE nel parsing JSON:", e, "Risposta del server:", this.responseText);
                 showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.', 'error');
             }
         } else {
+            console.error("Errore HTTP:", this.status);
             showToast('Errore', 'Si è verificato un errore durante il consumo del prodotto.', 'error');
         }
+        
+        console.log("---- FINE PROCESSO CONSUMAZIONE ----");
     };
     xhr.onerror = function() {
+        console.error("Errore di rete nella richiesta");
         showToast('Errore', 'Si è verificato un errore di rete durante il consumo del prodotto.', 'error');
     };
-    xhr.send('relation_id=' + productId);
+    
+    const payload = 'relation_id=' + window.productToConsume + '&consume_quantity=' + consumeQuantity;
+    console.log("Invio payload:", payload);
+    xhr.send(payload);
+    
+    // Hide the modal
+    consumeModal.classList.remove('show');
+    
+    // Non resettare immediatamente le variabili per evitare problemi con le risposte asincrone
+    setTimeout(function() {
+        window.productToConsume = null;
+    }, 2000);
+};
+
+window.cancelConsumption = function() {
+    const consumeModal = document.getElementById('consume-modal');
+    consumeModal.classList.remove('show');
+    window.productToConsume = null;
 };
 
 window.editProduct = function(productId) {
@@ -110,7 +295,6 @@ window.deleteProduct = function(productId) {
 };
 
 // Funzione utility per i toast
-// Funzione utility per i toast
 function showToast(title, message, type) {
     var toast = document.getElementById('toast');
     if (!toast) return;
@@ -129,8 +313,8 @@ function showToast(title, message, type) {
             : 'fas fa-check-circle';
     }
     
-    // Add appropriate class for styling
-    toast.className = 'toast show';
+    // Aggiorniamo lo stile prima di mostrare il toast
+    toast.className = 'toast';
     if (type === 'error') {
         toast.style.borderLeftColor = 'var(--error-color)';
         toastIcon.style.color = 'var(--error-color)';
@@ -139,8 +323,21 @@ function showToast(title, message, type) {
         toastIcon.style.color = 'var(--success-color)';
     }
     
+    // Reset delle animazioni
+    toast.style.animation = 'none';
+    // Forza reflow
+    void toast.offsetWidth;
+    
+    // Aggiungi classe show con animazione
+    toast.classList.add('show');
+    toast.style.animation = 'toastSlideIn 0.3s ease forwards';
+    
     setTimeout(function() {
-        toast.classList.remove('show');
+        // Animazione in uscita
+        toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+        setTimeout(function() {
+            toast.classList.remove('show');
+        }, 300);
     }, 3000);
 }
 
@@ -151,7 +348,14 @@ function checkEmptyList() {
         var emptyMessage = document.createElement('li');
         emptyMessage.className = 'empty-message';
         emptyMessage.textContent = 'Nessun prodotto nel tuo frigo.';
+        emptyMessage.style.opacity = '0';
         productList.appendChild(emptyMessage);
+        
+        // Animazione fade-in
+        setTimeout(function() {
+            emptyMessage.style.transition = 'opacity 0.5s ease';
+            emptyMessage.style.opacity = '1';
+        }, 10);
     }
 }
 
@@ -192,19 +396,65 @@ document.addEventListener('DOMContentLoaded', function() {
                         try {
                             var response = JSON.parse(this.responseText);
                             if (response.success) {
-                                location.reload();
+                                // Troviamo l'elemento e lo rimuoviamo invece di ricaricare
+                                var productElements = document.querySelectorAll('.product-item');
+                                var found = false;
+                                
+                                for (var i = 0; i < productElements.length; i++) {
+                                    var product = productElements[i];
+                                    var actionElement = product.querySelector('.product-actions');
+                                    
+                                    if (actionElement) {
+                                        const onclickAttr = actionElement.getAttribute('onclick');
+                                        const match = onclickAttr.match(/showProductActions\((\d+)/);
+                                        
+                                        if (match && match[1] == window.productToDelete) {
+                                            found = true;
+                                            
+                                            // Animazione di rimozione
+                                            product.style.transition = "all 0.5s ease-out";
+                                            product.style.height = product.offsetHeight + "px";
+                                            product.style.overflow = "hidden";
+                                            
+                                            // Prima fase dell'animazione - fade out e slide
+                                            product.style.opacity = "0";
+                                            product.style.transform = "translateX(-30px)";
+                                            
+                                            // Seconda fase dell'animazione - riduzione altezza
+                                            setTimeout(function() {
+                                                product.style.height = "0";
+                                                product.style.marginTop = "0";
+                                                product.style.marginBottom = "0";
+                                                product.style.paddingTop = "0";
+                                                product.style.paddingBottom = "0";
+                                                
+                                                // Rimozione finale dell'elemento
+                                                setTimeout(function() {
+                                                    product.remove();
+                                                    checkEmptyList();
+                                                    showToast('Successo', 'Prodotto eliminato con successo.');
+                                                }, 300);
+                                            }, 300);
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (!found) {
+                                    location.reload();
+                                }
                             } else {
-                                showToast('Errore', response.message || 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                                showToast('Errore', response.message || 'Si è verificato un errore durante l\'eliminazione del prodotto.', 'error');
                             }
                         } catch (e) {
-                            showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.');
+                            showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.', 'error');
                         }
                     } else {
-                        showToast('Errore', 'Si è verificato un errore durante l\'eliminazione del prodotto.');
+                        showToast('Errore', 'Si è verificato un errore durante l\'eliminazione del prodotto.', 'error');
                     }
                 };
                 xhr.onerror = function() {
-                    showToast('Errore', 'Si è verificato un errore di rete durante l\'eliminazione del prodotto.');
+                    showToast('Errore', 'Si è verificato un errore di rete durante l\'eliminazione del prodotto.', 'error');
                 };
                 xhr.send('relation_id=' + window.productToDelete);
                 
@@ -452,5 +702,41 @@ document.addEventListener('DOMContentLoaded', function() {
             month: 'long',
             year: 'numeric'
         });
+    }
+    
+    // Aggiungiamo uno style per le animazioni
+    if (!document.getElementById('dashboard-animations')) {
+        const style = document.createElement('style');
+        style.id = 'dashboard-animations';
+        style.textContent = `
+            @keyframes pulseHighlight {
+                0% { background-color: transparent; }
+                50% { background-color: rgba(76, 175, 80, 0.3); }
+                100% { background-color: transparent; }
+            }
+            
+            @keyframes toastSlideIn {
+                0% { transform: translateX(150%); opacity: 0; }
+                100% { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes toastSlideOut {
+                0% { transform: translateX(0); opacity: 1; }
+                100% { transform: translateX(150%); opacity: 0; }
+            }
+            
+            .product-item {
+                transition: all 0.3s ease;
+            }
+            
+            .toast {
+                transition: all 0.3s ease;
+            }
+            
+            .empty-message {
+                transition: opacity 0.5s ease;
+            }
+        `;
+        document.head.appendChild(style);
     }
 });

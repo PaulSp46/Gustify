@@ -9,6 +9,76 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+     // Gestione del modal per eliminare tutti i prodotti
+    const deleteAllBtn = document.getElementById('delete-all-btn');
+    const deleteAllModal = document.getElementById('delete-all-confirmation-modal');
+    const cancelDeleteAllBtn = document.getElementById('cancel-delete-all-btn');
+    const confirmDeleteAllBtn = document.getElementById('confirm-delete-all-btn');
+    
+    // Event listener per il pulsante "Elimina Tutto"
+    if (deleteAllBtn) {
+        deleteAllBtn.addEventListener('click', function() {
+            if (deleteAllModal) {
+                deleteAllModal.classList.add('show');
+            }
+        });
+    }
+    
+    // Event listener per annullare l'eliminazione completa
+    if (cancelDeleteAllBtn) {
+        cancelDeleteAllBtn.addEventListener('click', function() {
+            deleteAllModal.classList.remove('show');
+        });
+    }
+    
+    // Event listener per confermare l'eliminazione completa
+    if (confirmDeleteAllBtn) {
+        confirmDeleteAllBtn.addEventListener('click', function() {
+            // Invia richiesta AJAX per eliminare tutti i prodotti
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '../CRUDfun/deleteAllConsumed.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    try {
+                        const response = JSON.parse(this.responseText);
+                        if (response.success) {
+                            // Mostra un messaggio di successo
+                            showToast('Cronologia eliminata', 'Tutti i prodotti consumati sono stati rimossi dalla cronologia.');
+                            
+                            // Ricarica la pagina dopo un breve ritardo
+                            setTimeout(function() {
+                                window.location.reload(true);
+                            }, 1000);
+                        } else {
+                            showToast('Errore', response.message || 'Si è verificato un errore durante l\'eliminazione dei prodotti.', 'error');
+                        }
+                    } catch (e) {
+                        showToast('Errore', 'Si è verificato un errore durante l\'elaborazione della risposta.', 'error');
+                    }
+                } else {
+                    showToast('Errore', 'Si è verificato un errore durante l\'eliminazione dei prodotti.', 'error');
+                }
+            };
+            xhr.onerror = function() {
+                showToast('Errore', 'Si è verificato un errore di rete durante l\'eliminazione dei prodotti.', 'error');
+            };
+            xhr.send();
+            
+            // Nascondi il modal
+            deleteAllModal.classList.remove('show');
+        });
+    }
+    
+    // Chiudi il modal cliccando fuori
+    if (deleteAllModal) {
+        deleteAllModal.addEventListener('click', function(e) {
+            if (e.target === deleteAllModal) {
+                deleteAllModal.classList.remove('show');
+            }
+        });
+    }
+
     // Filtri per la tabella dei prodotti consumati
     const categoryFilter = document.getElementById('category-filter');
     const timeFilter = document.getElementById('time-filter');

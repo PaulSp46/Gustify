@@ -6,7 +6,7 @@
     <title>Gustify - La tua app per la gestione alimentare</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="index.css">
-    <link rel="icon" href="../tablogo.png">
+    <link rel="icon" href="tablogo.png">
 </head>
 <body>
     <header>

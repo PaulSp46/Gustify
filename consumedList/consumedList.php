@@ -103,6 +103,12 @@
             <div class="filter-group">
                 <input type="text" class="search-box" id="search-product" placeholder="Cerca prodotto...">
             </div>
+
+            <?php if (count($products) > 0): ?>
+            <button id="delete-all-btn" class="delete-all-btn">
+                <i class="fas fa-trash-alt"></i> Elimina Tutto
+            </button>
+            <?php endif; ?>
         </div>
 
         <?php if (count($products) > 0): ?>
@@ -256,6 +262,25 @@
                 </button>
                 <button class="modal-btn modal-btn-danger" id="confirm-delete-btn" onclick="Reload()">
                     <i class="fas fa-trash-alt"></i> Elimina
+                </button>
+            </div>
+        </div>
+    </div>`
+
+    <!-- Delete All Confirmation Modal -->
+    <div class="modal-overlay" id="delete-all-confirmation-modal">
+        <div class="modal-container">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="modal-title">Conferma eliminazione completa</div>
+            <div class="modal-message">Sei sicuro di voler eliminare <strong>tutta la cronologia</strong> dei prodotti consumati? Questa azione non può essere annullata.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" id="cancel-delete-all-btn">
+                    <i class="fas fa-times"></i> Annulla
+                </button>
+                <button class="modal-btn modal-btn-danger" id="confirm-delete-all-btn">
+                    <i class="fas fa-trash-alt"></i> Elimina Tutto
                 </button>
             </div>
         </div>

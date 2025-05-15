@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             if (resp.success) {
                                 console.log('Prodotti aggiunti:', resp.added);
-                                // qui puoi aggiornare dinamicamente la UI o ricaricare la pagina
+                                location.reload();
                             } else {
                                 alert('Errore: ' + (resp.error || 'Errore sconosciuto'));
                             }
@@ -738,5 +738,72 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         `;
         document.head.appendChild(style);
+    }
+
+    // Gestione menu mobile - VERSIONE CORRETTA
+    const mobileMenuIcon = document.querySelector('.mobile-menu-icon');
+    const navLinks = document.querySelector('.nav-links');
+
+    // Crea l'elemento overlay se non esiste già
+    let menuOverlay = document.querySelector('.menu-overlay');
+    if (!menuOverlay) {
+        menuOverlay = document.createElement('div');
+        menuOverlay.classList.add('menu-overlay');
+        document.body.appendChild(menuOverlay);
+    }
+
+    // Funzione per aprire il menu
+    function openMobileMenu() {
+        navLinks.classList.add('show');
+        menuOverlay.classList.add('show');
+        document.body.classList.add('menu-open'); // Aggiungi questa classe al body
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Funzione per chiudere il menu
+    function closeMobileMenu() {
+        navLinks.classList.remove('show');
+        menuOverlay.classList.remove('show');
+        document.body.classList.remove('menu-open'); // Rimuovi questa classe dal body
+        document.body.style.overflow = '';
+    }
+
+    if (mobileMenuIcon && navLinks) {
+        // Gestisci il toggle del menu
+        mobileMenuIcon.addEventListener('click', function(event) {
+            // Previeni la propagazione dell'evento
+            event.stopPropagation();
+            
+            // Controlla se il menu è già aperto
+            if (navLinks.classList.contains('show')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        });
+        
+        // Chiudi il menu quando si clicca sull'overlay
+        menuOverlay.addEventListener('click', function(event) {
+            // Previeni la propagazione dell'evento
+            event.stopPropagation();
+            closeMobileMenu();
+        });
+        
+        // Chiudi il menu quando si clicca su un link
+        const navLinksItems = document.querySelectorAll('.nav-links a');
+        navLinksItems.forEach(item => {
+            item.addEventListener('click', function(event) {
+                // Previeni la propagazione dell'evento
+                event.stopPropagation();
+                closeMobileMenu();
+            });
+        });
+        
+        // Chiudi il menu se si preme ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && navLinks.classList.contains('show')) {
+                closeMobileMenu();
+            }
+        });
     }
 });

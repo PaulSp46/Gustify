@@ -868,10 +868,10 @@ input:checked + .slider:before {
         margin-bottom: 1.5rem;
     }
     
+    /* Menu mobile migliorato */
     .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
+        position: fixed; /* Cambiato da absolute a fixed */
+        top: 60px; /* Altezza approssimativa dell'header */
         left: 0;
         width: 100%;
         flex-direction: column;
@@ -879,23 +879,25 @@ input:checked + .slider:before {
         background-color: var(--bg-white);
         box-shadow: var(--shadow-md);
         padding: 0;
-        z-index: 10;
+        z-index: 101; /* Aumentato per stare sopra l'overlay */
         border-top: 1px solid var(--border-color);
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease, padding 0.3s ease;
+        transform: translateY(-100%); /* Utilizziamo transform invece di max-height */
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        display: flex; /* Sempre visibile ma trasformato fuori dallo schermo */
     }
     
     .nav-links.show {
-        display: flex;
-        max-height: 300px;
-        padding: 0.5rem 0;
+        transform: translateY(0); /* Mostrato quando ha classe .show */
+        opacity: 1;
     }
     
     .nav-links a {
         padding: 0.75rem 2rem;
         width: 100%;
         border-radius: 0;
+        display: flex;
+        align-items: center;
     }
     
     .nav-links a::after {
@@ -908,6 +910,34 @@ input:checked + .slider:before {
     
     .mobile-menu-icon {
         display: block;
+        z-index: 102; /* Deve essere sopra nav-links */
+    }
+    
+    /* Menu overlay trasparente (solo per bloccare clic) */
+    .menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent; /* Overlay completamente trasparente */
+        z-index: 100;
+        pointer-events: all; /* Assicura che catturi tutti gli eventi di clic */
+    }
+    
+    .menu-overlay.show {
+        display: block;
+    }
+    
+    /* Blocca interazioni con il contenuto sottostante */
+    body.menu-open .container * {
+        pointer-events: none; /* Disattiva le interazioni con elementi nel container quando il menu è aperto */
+    }
+    
+    body.menu-open .nav-links *,
+    body.menu-open .mobile-menu-icon {
+        pointer-events: auto; /* Mantieni le interazioni per elementi nel menu */
     }
 }
 
@@ -938,5 +968,31 @@ input:checked + .slider:before {
     
     .container {
         padding: 1.5rem 1rem;
+    }
+    
+    /* Miglioramenti specifici per mobile */
+    .profile-section {
+        padding: 1.25rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .product-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .category-tag {
+        align-self: flex-start;
+    }
+    
+    /* Touch target più grandi per mobile */
+    .profile-btn, .modal-btn {
+        padding: 0.875rem 1rem;
     }
 }

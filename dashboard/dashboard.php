@@ -59,6 +59,9 @@
         </nav>
     </header>
     
+    <!-- Div overlay per il menu mobile -->
+    <div class="menu-overlay"></div>
+    
     <div class="container">
         <section class="hero">
             <h1>Benvenuto su Gustify</h1>

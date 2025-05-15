@@ -561,15 +561,15 @@ footer {
 }
 
 /* Responsive design */
+/* Sostituisci il blocco media query per la navigazione mobile in frigoEdit.css */
 @media (max-width: 768px) {
     nav {
         padding: 1rem;
     }
     
     .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
+        position: fixed; /* Cambiato da absolute a fixed per evitare problemi di scroll */
+        top: 60px; /* Altezza approssimativa dell'header */
         left: 0;
         width: 100%;
         flex-direction: column;
@@ -577,23 +577,25 @@ footer {
         background-color: var(--bg-white);
         box-shadow: var(--shadow-md);
         padding: 0;
-        z-index: 10;
+        z-index: 100; /* Aumentato z-index */
         border-top: 1px solid var(--border-color);
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease, padding 0.3s ease;
+        transform: translateY(-100%); /* Inizialmente nascosto fuori dallo schermo */
+        transition: transform 0.3s ease, opacity 0.3s ease; /* Transizione basata su transform invece che max-height */
+        display: flex;
+        opacity: 0;
     }
     
     .nav-links.show {
-        display: flex;
-        max-height: 300px;
-        padding: 0.5rem 0;
+        transform: translateY(0); /* Mostrato quando ha la classe .show */
+        opacity: 1;
     }
     
     .nav-links a {
         padding: 0.75rem 2rem;
         width: 100%;
         border-radius: 0;
+        display: flex;
+        align-items: center;
     }
     
     .nav-links a::after {
@@ -606,6 +608,24 @@ footer {
     
     .mobile-menu-icon {
         display: block;
+        z-index: 101; /* Superiore al menu */
+    }
+    
+    /* Aggiungi uno sfondo scuro quando il menu è aperto */
+    .menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .menu-overlay.show {
+        display: block;
     }
     
     .container {
@@ -615,14 +635,55 @@ footer {
     .form-container {
         padding: 1.5rem;
         margin: 0 0.5rem;
+        width: calc(100% - 1rem);
+        box-sizing: border-box;
     }
     
     .form-buttons {
         flex-direction: column-reverse;
+        gap: 1rem;
     }
     
     .btn {
         width: 100%;
+        padding: 1rem 1.5rem; /* Aumentato il padding per miglior touch target */
+    }
+    
+    /* Miglioramenti per i numeri di input */
+    .number-input-wrapper {
+        flex-wrap: wrap;
+    }
+    
+    .number-control {
+        flex-direction: row;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .number-btn {
+        width: 44px; /* Più grande su mobile */
+        height: 44px; /* Più grande su mobile */
+        font-size: 1.1rem;
+    }
+    
+    /* Miglioramenti per i campi di input */
+    .form-control {
+        padding: 1rem;
+        font-size: 1.05rem;
+    }
+    
+    /* Migliorato campo data */
+    input[type="date"] {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
+    /* Migliorato campo readonly */
+    .readonly-field {
+        padding: 1rem;
+        font-size: 1.05rem;
     }
     
     .hero h1 {
@@ -650,4 +711,18 @@ footer {
     .hero h1 {
         font-size: 1.5rem;
     }
+    
+    /* Styling ottimizzato per schermi molto piccoli */
+    .form-group label {
+        font-size: 1rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    /* Toast più visibile su mobile */
+    .toast {
+        max-width: 90%;
+        right: 5%;
+        left: 5%;
+    }
 }
+

@@ -756,6 +756,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
+
+
     // Filtro per categoria
     const categoryFilter = document.getElementById('category-filter');
     const expiryFilter = document.getElementById('expiry-filter');

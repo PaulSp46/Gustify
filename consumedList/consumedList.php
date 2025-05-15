@@ -48,7 +48,6 @@
     <title>Prodotti Consumati - Gustify</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="consumedList.css">
-    <link rel="stylesheet" href="consumedList.css">
     <link rel="icon" href="../tablogo.png">
 </head>
 <body>
@@ -186,11 +185,11 @@
                                 <span><?php echo htmlspecialchars($product['des']); ?></span>
                             </div>
                         </td>
-                        <td><?php echo ucfirst(htmlspecialchars($product['categoria'])); ?></td>
-                        <td><?php echo htmlspecialchars($product['marca'] ?? 'N/D'); ?></td>
-                        <td><?php echo htmlspecialchars($product['quantita']); ?></td>
-                        <td><?php echo formatDate($product['data_consumo']); ?></td>
-                        <td class="note-cell">
+                        <td data-label="Categoria"><?php echo ucfirst(htmlspecialchars($product['categoria'])); ?></td>
+                        <td data-label="Marca"><?php echo htmlspecialchars($product['marca'] ?? 'N/D'); ?></td>
+                        <td data-label="Quantità"><?php echo htmlspecialchars($product['quantita']); ?></td>
+                        <td data-label="Data"><?php echo formatDate($product['data_consumo']); ?></td>
+                        <td class="note-cell" data-label="Note">
                             <?php 
                                 if (!empty($product["note"])) {
                                     $notes = htmlspecialchars($product['note']);
@@ -265,7 +264,7 @@
                 </button>
             </div>
         </div>
-    </div>`
+    </div>
 
     <!-- Delete All Confirmation Modal -->
     <div class="modal-overlay" id="delete-all-confirmation-modal">
@@ -285,6 +284,9 @@
             </div>
         </div>
     </div>
+    
+    <!-- Div overlay per il menu mobile -->
+    <div class="menu-overlay"></div>
     
     <footer>
         <p>&copy; 2025 Gustify - Sviluppato da Paul&Federic Software House</p>

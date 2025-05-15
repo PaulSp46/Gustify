@@ -1059,7 +1059,6 @@ footer {
     }
     
     .nav-links {
-        display: none;
         position: absolute;
         top: 100%;
         left: 0;
@@ -1074,10 +1073,10 @@ footer {
         max-height: 0;
         overflow: hidden;
         transition: max-height 0.3s ease, padding 0.3s ease;
+        display: flex; /* Cambiato: non più display: none */
     }
     
     .nav-links.show {
-        display: flex;
         max-height: 300px;
         padding: 0.5rem 0;
     }
@@ -1396,36 +1395,6 @@ tr:hover .product-icon {
     }
 }
 
-@media (max-width: 768px) {
-    .action-cell {
-        position: sticky;
-        right: 0;
-        background-color: var(--bg-white);
-        box-shadow: -5px 0 10px rgba(0, 0, 0, 0.05);
-    }
-    
-    tr:hover .action-cell {
-        background-color: rgba(76, 175, 80, 0.05);
-    }
-    
-    .consumed-table th:first-child, 
-    .consumed-table td:first-child {
-        position: sticky;
-        left: 0;
-        background-color: var(--bg-white);
-        z-index: 5;
-        box-shadow: 5px 0 10px rgba(0, 0, 0, 0.05);
-    }
-    
-    .consumed-table th:first-child {
-        background-color: var(--bg-gray);
-    }
-    
-    tr:hover td:first-child {
-        background-color: rgba(76, 175, 80, 0.05);
-    }
-}
-
 .delete-all-btn {
     display: inline-flex;
     align-items: center;
@@ -1471,8 +1440,178 @@ tr:hover .product-icon {
 }
 
 @media (max-width: 768px) {
-    .delete-all-btn {
+    nav {
+        padding: 1rem;
+    }
+    
+    .nav-links {
+        position: fixed; /* Cambiato da absolute a fixed per evitare problemi di scroll */
+        top: 60px; /* Altezza approssimativa dell'header */
+        left: 0;
         width: 100%;
-        margin-top: 0.5rem;
+        flex-direction: column;
+        gap: 0;
+        background-color: var(--bg-white);
+        box-shadow: var(--shadow-md);
+        padding: 0;
+        z-index: 100; /* Aumentato z-index */
+        border-top: 1px solid var(--border-color);
+        transform: translateY(-100%); /* Inizialmente nascosto fuori dallo schermo */
+        transition: transform 0.3s ease; /* Transizione basata su transform invece che max-height */
+        display: flex;
+        opacity: 0;
+    }
+    
+    .nav-links.show {
+        transform: translateY(0); /* Mostrato quando ha la classe .show */
+        opacity: 1;
+    }
+    
+    .nav-links a {
+        padding: 0.75rem 2rem;
+        width: 100%;
+        border-radius: 0;
+    }
+    
+    .nav-links a::after {
+        display: none;
+    }
+    
+    .nav-links a:hover {
+        background-color: var(--bg-light);
+    }
+    
+    .mobile-menu-icon {
+        display: block;
+        z-index: 101; /* Superiore al menu */
+    }
+    
+    /* Aggiungi uno sfondo scuro quando il menu è aperto */
+    .menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .menu-overlay.show {
+        display: block;
+    }
+}
+
+/* Sistema le intestazioni della tabella fisse per schermi medi */
+@media (max-width: 1024px) {
+    .consumed-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .consumed-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+}
+
+/* Layout a schede per schermi molto piccoli */
+@media (max-width: 576px) {
+    .consumed-table, 
+    .consumed-table tbody, 
+    .consumed-table thead, 
+    .consumed-table tr {
+        display: block;
+        width: 100%;
+    }
+    
+    .consumed-table thead {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .consumed-table tbody tr {
+        margin-bottom: 1.5rem;
+        display: block;
+        border: 1px solid var(--border-color);
+        border-radius: var(--rounded-lg);
+        box-shadow: var(--shadow-sm);
+        background-color: var(--bg-white);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .consumed-table tbody tr::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: var(--primary-gradient);
+    }
+    
+    .consumed-table td {
+        display: flex;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px dashed var(--border-color);
+        text-align: left;
+        align-items: center;
+    }
+    
+    .consumed-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .consumed-table td::before {
+        content: attr(data-label);
+        width: 40%;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-right: 1rem;
+    }
+    
+    /* Gestisce la cella del prodotto in modo speciale */
+    .consumed-table td.product-name {
+        border-left: none;
+        background-color: var(--bg-light);
+        padding: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .consumed-table td.product-name::before {
+        content: '';
+        width: auto;
+        margin-right: 0;
+    }
+    
+    /* Sistemazione per la cella delle azioni */
+    .consumed-table td.action-cell {
+        justify-content: flex-end;
+        background-color: var(--bg-light);
+        padding: 0.75rem 1rem;
+    }
+    
+    .consumed-table td.action-cell::before {
+        content: '';
+        width: auto;
+        margin-right: 0;
+    }
+    
+    /* Rendi i bottoni più grandi su mobile per una migliore usabilità */
+    .delete-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+    
+    /* Sistemazione filtri su mobile */
+    .filter-container {
+        padding: 1rem;
     }
 }

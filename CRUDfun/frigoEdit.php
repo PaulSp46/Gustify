@@ -114,6 +114,7 @@
     <title>Modifica Prodotto - Gustify</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="frigoEdit.css">
+    <link rel="icon" href="../tablogo.png">
 </head>
 <body>
     <header>
@@ -125,6 +126,7 @@
             <ul class="nav-links">
                 <li><a href="../dashboard/dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="../productsList/productsList.php" class="active"><i class="fas fa-shopping-basket"></i> Prodotti</a></li>
+                <li><a href="../consumedList/consumedList.php"><i class="fas fa-utensils"></i> Consumati</a></li>
                 <li><a href="../profile/profile.php"><i class="fas fa-user"></i> Profilo</a></li>
             </ul>
             <div class="mobile-menu-icon">
@@ -132,6 +134,9 @@
             </div>
         </nav>
     </header>
+    
+    <!-- Div overlay per il menu mobile -->
+    <div class="menu-overlay"></div>
     
     <div class="container">
         <section class="hero fade-in">
@@ -268,29 +273,73 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Gestione menu mobile
+            // Gestione menu mobile - VERSIONE MIGLIORATA
             const mobileMenuIcon = document.querySelector('.mobile-menu-icon');
             const navLinks = document.querySelector('.nav-links');
+            
+            // Crea l'elemento overlay se non esiste già
+            let menuOverlay = document.querySelector('.menu-overlay');
+            if (!menuOverlay) {
+                menuOverlay = document.createElement('div');
+                menuOverlay.classList.add('menu-overlay');
+                document.body.appendChild(menuOverlay);
+            }
             
             if (mobileMenuIcon && navLinks) {
                 mobileMenuIcon.addEventListener('click', function() {
                     navLinks.classList.toggle('show');
+                    menuOverlay.classList.toggle('show');
+                    document.body.style.overflow = navLinks.classList.contains('show') ? 'hidden' : ''; // Blocca lo scroll quando il menu è aperto
+                });
+                
+                // Chiudi il menu quando si clicca sull'overlay
+                menuOverlay.addEventListener('click', function() {
+                    navLinks.classList.remove('show');
+                    menuOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+                
+                // Chiudi il menu quando si clicca su un link
+                const navLinksItems = document.querySelectorAll('.nav-links a');
+                navLinksItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        navLinks.classList.remove('show');
+                        menuOverlay.classList.remove('show');
+                        document.body.style.overflow = '';
+                    });
                 });
             }
             
-            // Controlli per input numerico
+            // Controlli per input numerico - MIGLIORATI per touch
             const quantityInput = document.getElementById('quantity');
             const increaseBtn = document.querySelector('.increase-btn');
             const decreaseBtn = document.querySelector('.decrease-btn');
             
             if (quantityInput && increaseBtn && decreaseBtn) {
+                // Aumento - con controllo di sicurezza
                 increaseBtn.addEventListener('click', function() {
-                    quantityInput.value = parseInt(quantityInput.value) + 1;
+                    const currentVal = parseInt(quantityInput.value) || 1;
+                    quantityInput.value = currentVal + 1;
+                    // Animazione di feedback
+                    this.classList.add('active');
+                    setTimeout(() => this.classList.remove('active'), 200);
                 });
                 
+                // Diminuzione - con controllo di sicurezza
                 decreaseBtn.addEventListener('click', function() {
-                    if (parseInt(quantityInput.value) > 1) {
-                        quantityInput.value = parseInt(quantityInput.value) - 1;
+                    const currentVal = parseInt(quantityInput.value) || 2;
+                    if (currentVal > 1) {
+                        quantityInput.value = currentVal - 1;
+                        // Animazione di feedback
+                        this.classList.add('active');
+                        setTimeout(() => this.classList.remove('active'), 200);
+                    }
+                });
+                
+                // Assicuriamoci che il valore sia sempre valido
+                quantityInput.addEventListener('blur', function() {
+                    if (this.value === '' || isNaN(this.value) || parseInt(this.value) < 1) {
+                        this.value = 1;
                     }
                 });
             }
@@ -347,6 +396,7 @@
                     let isValid = true;
                     
                     // Validazione quantità
+                    const quantityInput = document.getElementById('quantity');
                     if (parseInt(quantityInput.value) < 1) {
                         isValid = false;
                         quantityInput.style.borderColor = 'var(--error-color)';
@@ -380,6 +430,6 @@
             exit;
         }
     } else {
-        header("Location: /login.html");
+        header("Location: ../login/login.html");
     }
 ?>

@@ -3,9 +3,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuIcon = document.querySelector('.mobile-menu-icon');
     const navLinks = document.querySelector('.nav-links');
     
-    if (mobileMenuIcon) {
+    const menuOverlay = document.createElement('div');
+    menuOverlay.classList.add('menu-overlay');
+    document.body.appendChild(menuOverlay);
+
+     if (mobileMenuIcon) {
         mobileMenuIcon.addEventListener('click', function() {
             navLinks.classList.toggle('show');
+            menuOverlay.classList.toggle('show');
+            document.body.style.overflow = navLinks.classList.contains('show') ? 'hidden' : ''; // Blocca lo scroll quando il menu è aperto
+        });
+        
+        menuOverlay.addEventListener('click', function() {
+            navLinks.classList.remove('show');
+            menuOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        });
+
+        const navLinksItems = document.querySelectorAll('.nav-links a');
+        navLinksItems.forEach(item => {
+            item.addEventListener('click', function() {
+                navLinks.classList.remove('show');
+                menuOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            });
         });
     }
 

@@ -100,6 +100,70 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="profile.css">
     <link rel="icon" href="../tablogo.png">
+
+    <style>
+    /* Menu mobile overlay */
+    .menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        animation: fadeIn 0.3s ease;
+        pointer-events: all;
+    }
+
+    .menu-overlay.show {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        header {
+            z-index: 100;
+        }
+        
+        .nav-links {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            flex-direction: column;
+            gap: 0;
+            background-color: var(--bg-white);
+            box-shadow: var(--shadow-md);
+            padding: 0;
+            z-index: 101;
+            border-top: 1px solid var(--border-color);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            display: flex;
+            opacity: 0;
+        }
+        
+        .mobile-menu-icon {
+            display: block;
+            z-index: 102;
+        }
+        
+        body.menu-open {
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+        
+        body.menu-open .container * {
+            pointer-events: none;
+        }
+        
+        body.menu-open .nav-links *,
+        body.menu-open .mobile-menu-icon {
+            pointer-events: auto;
+        }
+    }
+    </style>
 </head>
 <body>
     <!-- Header & Navigation -->
@@ -120,6 +184,9 @@ try {
             </div>
         </nav>
     </header>
+    
+    <!-- Div overlay per il menu mobile -->
+    <div class="menu-overlay" id="menu-overlay"></div>
     
     <!-- Main Content Container -->
     <div class="container">
@@ -275,7 +342,7 @@ try {
                     </ul>
                 </div>
                 
-                <!-- Preferences Section -->
+                <!-- Preferences Section
                 <div class="profile-section">
                     <div class="section-header">
                         <h2>Preferenze</h2>
@@ -308,7 +375,7 @@ try {
                             </label>
                         </div>
                     </div>
-                </div>
+                </div>-->
             </div>
         </div>
     </div>
@@ -340,6 +407,74 @@ try {
     <!-- JavaScript for Interactivity -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Gestione menu mobile - VERSIONE CORRETTA
+            const mobileMenuIcon = document.querySelector('.mobile-menu-icon');
+            const navLinks = document.querySelector('.nav-links');
+
+            // Crea l'elemento overlay se non esiste già
+            let menuOverlay = document.querySelector('.menu-overlay');
+            if (!menuOverlay) {
+                menuOverlay = document.createElement('div');
+                menuOverlay.classList.add('menu-overlay');
+                document.body.appendChild(menuOverlay);
+            }
+
+            // Funzione per aprire il menu
+            function openMobileMenu() {
+                navLinks.classList.add('show');
+                menuOverlay.classList.add('show');
+                document.body.classList.add('menu-open'); // Aggiungi questa classe al body
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Funzione per chiudere il menu
+            function closeMobileMenu() {
+                navLinks.classList.remove('show');
+                menuOverlay.classList.remove('show');
+                document.body.classList.remove('menu-open'); // Rimuovi questa classe dal body
+                document.body.style.overflow = '';
+            }
+
+            if (mobileMenuIcon && navLinks) {
+                // Gestisci il toggle del menu
+                mobileMenuIcon.addEventListener('click', function(event) {
+                    // Previeni la propagazione dell'evento
+                    event.stopPropagation();
+                    
+                    // Controlla se il menu è già aperto
+                    if (navLinks.classList.contains('show')) {
+                        closeMobileMenu();
+                    } else {
+                        openMobileMenu();
+                    }
+                });
+                
+                // Chiudi il menu quando si clicca sull'overlay
+                menuOverlay.addEventListener('click', function(event) {
+                    // Previeni la propagazione dell'evento
+                    event.stopPropagation();
+                    closeMobileMenu();
+                });
+                
+                // Chiudi il menu quando si clicca su un link
+                const navLinksItems = document.querySelectorAll('.nav-links a');
+                navLinksItems.forEach(item => {
+                    item.addEventListener('click', function(event) {
+                        // Previeni la propagazione dell'evento
+                        event.stopPropagation();
+                        closeMobileMenu();
+                    });
+                });
+                
+                // Chiudi il menu se si preme ESC
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && navLinks.classList.contains('show')) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            // Mantieni il resto dello script originale qui sotto
             // DOM Elements
             const editProfileBtn = document.getElementById('edit-profile-btn');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');

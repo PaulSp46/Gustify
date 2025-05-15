@@ -1116,38 +1116,41 @@ footer {
 }
 
 /* Responsive design */
+/* Aggiungi queste regole specifiche per la navigazione mobile */
 @media (max-width: 768px) {
     nav {
         padding: 1rem;
     }
     
     .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
+        position: fixed; /* Cambiato da absolute a fixed per evitare problemi di scroll */
+        top: 60px; /* Altezza approssimativa dell'header */
         left: 0;
         width: 100%;
         flex-direction: column;
+        gap: 0;
         background-color: var(--bg-white);
         box-shadow: var(--shadow-md);
-        z-index: 100;
         padding: 0;
+        z-index: 100; /* Aumentato z-index */
         border-top: 1px solid var(--border-color);
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease, padding 0.3s ease;
+        transform: translateY(-100%); /* Inizialmente nascosto fuori dallo schermo */
+        transition: transform 0.3s ease, opacity 0.3s ease; /* Transizione basata su transform invece che max-height */
+        display: flex;
+        opacity: 0;
     }
     
     .nav-links.show {
-        display: flex;
-        max-height: 300px;
-        padding: 0.5rem 0;
+        transform: translateY(0); /* Mostrato quando ha la classe .show */
+        opacity: 1;
     }
     
     .nav-links a {
         padding: 0.75rem 2rem;
         width: 100%;
         border-radius: 0;
+        display: flex;
+        align-items: center;
     }
     
     .nav-links a::after {
@@ -1160,84 +1163,101 @@ footer {
     
     .mobile-menu-icon {
         display: block;
+        z-index: 101; /* Superiore al menu */
     }
     
-    .container {
-        padding: 1.5rem 1rem;
-    }
-    
-    .features {
-        grid-template-columns: 1fr;
-    }
-    
-    .product-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-        position: relative;
-        padding: 1.25rem 1rem;
-    }
-    
-    .product-actions {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-    }
-    
-    #button-container {
-        flex-direction: column;
-    }
-    
-    .scan-btn, .manual-btn {
+    /* Aggiunta dello sfondo scuro quando il menu è aperto */
+    .menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        animation: fadeIn 0.3s ease;
     }
     
-    .hero {
-        padding: 1.5rem;
-    }
-    
-    .hero h1 {
-        font-size: 1.75rem;
-    }
-    
-    .hero p {
-        font-size: 1rem;
+    .menu-overlay.show {
+        display: block;
     }
 }
 
+/* Anche su schermi molto piccoli la navigazione deve funzionare bene */
 @media (max-width: 480px) {
-    .hero {
-        padding: 1.25rem;
+    .nav-links a {
+        padding: 1rem 2rem; /* Leggermente più grande per migliorare touch target */
     }
     
-    .hero h1 {
-        font-size: 1.5rem;
+    .mobile-menu-icon {
+        font-size: 1.75rem; /* Icona più grande per migliore tocco */
+    }
+}
+
+/* Aggiorna le proprietà dell'overlay nel CSS per assicurarti che blocchi tutti i clic */
+
+.menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99; /* Assicurati che sia inferiore a nav-links ma superiore a tutti gli altri elementi */
+    animation: fadeIn 0.3s ease;
+    pointer-events: all; /* Questo è cruciale - assicura che catturi tutti gli eventi di clic */
+}
+
+.menu-overlay.show {
+    display: block;
+}
+
+/* Usiamo valori di z-index coerenti per garantire l'impilamento corretto */
+@media (max-width: 768px) {
+    header {
+        z-index: 100; /* Assicuriamoci che l'header sia al di sopra dell'overlay */
     }
     
-    .product-list {
-        margin: 0 -0.5rem;
+    .nav-links {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        flex-direction: column;
+        gap: 0;
+        background-color: var(--bg-white);
+        box-shadow: var(--shadow-md);
+        padding: 0;
+        z-index: 101; /* Deve essere sopra l'overlay (99) */
+        border-top: 1px solid var(--border-color);
+        transform: translateY(-100%);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        display: flex;
+        opacity: 0;
     }
     
-    .features {
-        gap: 1rem;
-        margin-bottom: 1.5rem;
+    .mobile-menu-icon {
+        display: block;
+        z-index: 102; /* Deve essere sopra nav-links */
     }
     
-    .feature-card {
-        padding: 1.25rem;
+    /* Blocca completamente l'interazione con il contenuto sottostante */
+    body.menu-open {
+        overflow: hidden;
+        position: relative;
+        height: 100%;
     }
     
-    .feature-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 1.25rem;
+    /* Nascondi altri elementi interattivi quando il menu è aperto */
+    body.menu-open .container * {
+        pointer-events: none; /* Disattiva le interazioni mentre il menu è aperto */
     }
     
-    .feature-card h3 {
-        font-size: 1.1rem;
-    }
-    
-    .section-header h2 {
-        font-size: 1.1rem;
+    /* Mantieni gli eventi di puntatore sul menu */
+    body.menu-open .nav-links *,
+    body.menu-open .mobile-menu-icon {
+        pointer-events: auto;
     }
 }
